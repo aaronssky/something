@@ -1,24 +1,49 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Home from "./views/Home.vue";
+import index from "./pages/index.vue";
+import Home from "./pages/home";
 
 Vue.use(Router);
 
 export default new Router({
-  routes: [
-    {
-      path: "/",
-      name: "home",
-      component: Home
-    },
-    {
-      path: "/about",
-      name: "about",
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () =>
-        import(/* webpackChunkName: "about" */ "./views/About.vue")
-    }
-  ]
+    // mode: 'history',
+    routes: [{
+        path: "/",
+        name: "index",
+        redirect: '/home',
+        component: index,
+        children: [{
+            path: '/home',
+            name: 'home',
+            components: {
+                home: Home
+            }
+        }, {
+            path: '/found/:id?',
+            name: "found",
+            components: {
+                found: () => import("./pages/found")
+            }
+        }]
+
+    }, {
+        path: "/about/:id",
+        name: "about",
+        props: true,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () =>
+            import( /* webpackChunkName: "about" */ "./pages/about")
+    }, {
+        path: "/about2/:id",
+        name: "about2",
+        props: true,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: (resolve) => {
+            require(["./pages/about"], resolve)
+        }
+    }]
 });
