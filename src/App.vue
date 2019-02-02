@@ -60,6 +60,10 @@
         // 进入页过渡中持续存在的class
         &-enter-active {
             transition: all $slideDuration cubic-bezier(1.0, 0.5, 0.8, 1.0);
+            position: fixed;
+            z-index: 1;
+            overflow: hidden;
+            overflow-y: auto;
             // max-height: 100%;
             // overflow: hidden;
             // background-color: white;
@@ -67,15 +71,18 @@
 
         // 进入页过渡中持续存在的class
         &-enter-to {
-            // transform: translateX(0%);
-            z-index: 1;
+            // 这个在此可加可不加
+            transform: translateX(0);
         }
 
         // 退出页过渡中持续存在的class
         &-leave-active {
             transition: all $slideDuration cubic-bezier(1.0, 0.5, 0.8, 1.0);
-            z-index: 0;
+            position: fixed;
             // max-height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            overflow-y: auto;
         }
 
         // 退出页过渡中持续存在的class
@@ -83,7 +90,6 @@
             transform: translateX(-30%);
             // opacity: 0;
             // max-height: 100%;
-            overflow: hidden;
         }
     }
 
@@ -99,10 +105,12 @@
             transition: all $slideDuration cubic-bezier(1.0, 0.5, 0.8, 1.0);
             // max-height: 100%;
             overflow: hidden;
+            z-index: 0;
         }
 
         &-enter-to {
-            z-index: 0;
+            // 这个在此可加可不加
+            transform: translateX(0);
         }
 
         &-leave-active {
@@ -117,5 +125,4 @@
             // opacity: 0;
         }
     }
-
 </style>
