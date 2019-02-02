@@ -7,9 +7,13 @@
             <router-link :to="{path:'/found', query:{id:44}}">found2</router-link>
         </div> -->
         <transition name="slide-next">
-            <keep-alive>
-                <router-view class="router-view" />
+            <keep-alive v-if="$route.meta.keepAlive">
+                <router-view class="router-view"></router-view>
             </keep-alive>
+            <router-view v-if="!$route.meta.keepAlive" class="router-view"></router-view>
+            <!-- <keep-alive>
+                <router-view class="router-view" />
+            </keep-alive> -->
         </transition>
     </div>
 </template>
@@ -22,13 +26,13 @@
 </script>
 
 <style lang="scss">
-
     #app {
         font-family: "Avenir", Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
         color: #2c3e50;
+        font-size: 28px;
     }
 
     .page {

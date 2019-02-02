@@ -1,6 +1,7 @@
 <template>
     <div class="about page">
         <h1>This is an about page {{id}}</h1>
+        <h1> {{a}}</h1>
     </div>
 </template>
 

@@ -12,20 +12,30 @@ export default new Router({
         name: "index",
         redirect: '/home',
         component: index,
+        // 使用children路由作为导航载体
         children: [{
             path: '/home',
             name: 'home',
             components: {
                 home: Home
+            },
+            meta: {
+                pageTitle: "主页",
+                // 导航页与至二级页面相互切换时候应用
+                keepAlive: true,
             }
         }, {
             path: '/found/:id?',
             name: "found",
             components: {
                 found: () => import("./pages/found")
+            },
+            meta: {
+                pageTitle: "发现",
+                // 导航页与至二级页面相互切换时候应用
+                keepAlive: true,
             }
         }]
-
     }, {
         path: "/about/:id",
         name: "about",
@@ -44,6 +54,10 @@ export default new Router({
         // which is lazy-loaded when the route is visited.
         component: (resolve) => {
             require(["./pages/about"], resolve)
+        },
+        meta: {
+            pageTitle: "关于",
+            keepAlive: false,
         }
     }]
 });

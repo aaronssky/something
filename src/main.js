@@ -10,13 +10,19 @@ import "./registerServiceWorker";
 window.mobileUtil.fixScreen();
 Vue.config.productionTip = false;
 
-router.beforeEach((to, from, next)=>{
+router.beforeEach((to, from, next) => {
+
     // console.log("beforeEach");
     // console.log(to);
+    if (to.meta && to.meta.pageTitle) {
+        window.document.title = to.meta.pageTitle
+    } else {
+        window.document.title = "something";
+    }
     next();
 });
 
-router.afterEach((to, from)=>{
+router.afterEach((to, from) => {
     // console.log("afterEach");
     // console.log(from);
     // console.log(to);

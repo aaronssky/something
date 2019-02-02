@@ -1,12 +1,20 @@
 <template>
     <div class="page">
         <div class="index-container">
+            <div>{{($route.meta)}}</div>
+            <!-- <keep-alive v-if="$route.meta.keepAlive">
+                <router-view name="home"></router-view>
+            </keep-alive>
+            <router-view name="home" v-if="!$route.meta.keepAlive"></router-view> -->
+            <!-- 导航级组件强制缓存 -->
             <keep-alive>
                 <router-view name="home"></router-view>
             </keep-alive>
             <keep-alive>
                 <router-view name="found"></router-view>
             </keep-alive>
+
+            <!-- 底部导航栏组件 -->
             <main-nav />
 
         </div>

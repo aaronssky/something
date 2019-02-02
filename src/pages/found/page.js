@@ -2,7 +2,8 @@ export default {
     name: "page",
     data() {
         return {
-            id: ""
+            id: "",
+            a: Math.random()
         }
     },
     props: {
@@ -22,6 +23,14 @@ export default {
         next(vm => {
             // console.log("导航被确认后回调，mounted之后")
         });
+    },
+    beforeRouteLeave(to, from, next) {
+        // if (to.path == "/home") {
+        //     to.meta.keepAlive = true;
+        // } else {
+        //     to.meta.keepAlive = true;
+        // }
+        next();
     },
     methods: {
         ajaxGetDetail() {

@@ -2,7 +2,8 @@ export default {
     name: "page",
     data() {
         return {
-            id: ""
+            id: "",
+            a: Math.random()
         }
     },
     props: {

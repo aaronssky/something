@@ -1,7 +1,7 @@
 <template>
     <div class="home">
-        <img alt="Vue logo" src="@/assets/logo.png">
-        <div>11133</div>
+        <!-- <img alt="Vue logo" src="@/assets/logo.png"> -->
+        <div>{{a}}</div>
         <div>111</div>
         <div>111</div>
         <div>111</div>
