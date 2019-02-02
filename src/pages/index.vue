@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-        <div class="index-container">
+        <div class="page-index">
             <div>{{($route.meta)}}</div>
             <!-- <keep-alive v-if="$route.meta.keepAlive">
                 <router-view name="home"></router-view>
@@ -42,7 +42,7 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
     .page {
-        .index-container {
+        .page-index {
             // position: absolute;
             // left: 0;
             // right: 0;
