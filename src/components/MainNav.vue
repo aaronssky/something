@@ -43,15 +43,16 @@
 
         .item {
             flex: 1;
-        }
 
-        a {
-            font-weight: bold;
-            color: #a8b8c9;
+            a {
+                font-weight: bold;
+                color: #a8b8c9;
 
-            &.router-link-exact-active {
-                color: #42b983;
+                &.router-link-exact-active {
+                    color: #42b983;
+                }
             }
         }
+
     }
 </style>
