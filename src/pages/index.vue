@@ -1,5 +1,5 @@
 <template>
-    <PageScroller class="page" msg="234">
+    <PageScroller class="page">
         <div class="page-index">
             <div>{{($route.meta)}}</div>
             <!-- <keep-alive v-if="$route.meta.keepAlive">
@@ -30,9 +30,11 @@
                 msg: '这是首页1'
             }
         },
-        mounted() {
+        created() {
             console.log('初始化应用首页')
+
         },
+        mounted() {},
         components: {
             MainNav
         }

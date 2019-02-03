@@ -44,7 +44,7 @@ export default {
             //这样就可以获取到变化的参数了，然后执行参数变化后相应的逻辑就行了
             // console.log(this.$route);
             this.id = this.$route.params.id || this.$route.query.id;
-            this.ajaxGetDetail();
+            // this.ajaxGetDetail();
         }
     }
 };

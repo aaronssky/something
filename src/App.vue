@@ -6,15 +6,15 @@
             <router-link :to="{path:'/about2/2', query:{tt:44}}">About2</router-link>
             <router-link :to="{path:'/found', query:{id:44}}">found2</router-link>
         </div> -->
-        <transition name="slide-prev">
-            <keep-alive v-if="$route.meta.keepAlive">
-                <router-view class="router-view"></router-view>
+        <transition name="slide-next">
+            <keep-alive>
+                <router-view class="router-view" v-if="$route.meta.keepAlive"></router-view>
             </keep-alive>
-            <router-view v-if="!$route.meta.keepAlive" class="router-view"></router-view>
-            <!-- <keep-alive>
-                <router-view class="router-view" />
-            </keep-alive> -->
         </transition>
+        <transition name="slide-next">
+            <router-view v-if="!$route.meta.keepAlive" class="router-view"></router-view>
+        </transition>
+
     </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-    <PageScroller class="about page" msg="234">
+    <PageScroller class="about page">
         <h1>This is an about page {{id}}</h1>
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>
