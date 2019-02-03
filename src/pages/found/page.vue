@@ -1,7 +1,7 @@
 <template>
     <div class="found">
         <h1>This is found page {{id}}</h1>
-                <div>{{a}}</div>
+        <div>{{a}}</div>
         <div>111</div>
         <div>111</div>
         <div>111</div>
@@ -31,7 +31,7 @@
         <div>111</div>
         <div>111</div>
         <div>111</div>
-                <div>11133</div>
+        <div>11133</div>
         <div>111</div>
         <div>111</div>
         <div>111</div>

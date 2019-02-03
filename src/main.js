@@ -5,7 +5,9 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
+import packages from "./packages";
 import "./registerServiceWorker";
+
 
 window.mobileUtil.fixScreen();
 Vue.config.productionTip = false;
@@ -27,6 +29,10 @@ router.afterEach((to, from) => {
     // console.log(from);
     // console.log(to);
 });
+
+if (packages.install && !packages.install.installed) {
+    Vue.use(packages);
+}
 
 window.vm = new Vue({
     router,

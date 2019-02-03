@@ -1,5 +1,5 @@
 <template>
-    <div class="page">
+    <PageScroller class="page" msg="234">
         <div class="page-index">
             <div>{{($route.meta)}}</div>
             <!-- <keep-alive v-if="$route.meta.keepAlive">
@@ -19,7 +19,7 @@
 
         </div>
 
-    </div>
+    </PageScroller>
 </template>
 
 <script>

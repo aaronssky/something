@@ -1,5 +1,5 @@
 <template>
-    <div class="about page">
+    <PageScroller class="about page" msg="234">
         <h1>This is an about page {{id}}</h1>
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>
@@ -41,7 +41,7 @@
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>
-    </div>
+    </PageScroller>
 </template>
 
 <script>
