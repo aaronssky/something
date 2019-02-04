@@ -58,6 +58,21 @@ export default new Router({
         meta: {
             pageTitle: "关于",
             keepAlive: false,
+            componentName: "page-about"
         }
-    }]
+    }, {
+        path: "/product",
+        name: "product",
+        props: true,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () =>
+            import( /* webpackChunkName: "product" */ "./pages/product"),
+        meta: {
+            pageTitle: "xq",
+            keepAlive: false,
+            componentName: "page-product"
+        }
+    }, ]
 });

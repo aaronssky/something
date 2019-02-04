@@ -1,6 +1,6 @@
 <template>
-    <PageScroller class="about page">
-        <h1 @click="toPageProduct(234)">This is an about page {{id}}</h1>
+    <PageScroller class="product page">
+        <h1>an product page {{id}}</h1>
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>

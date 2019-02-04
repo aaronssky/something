@@ -16,6 +16,7 @@ export default {
     created() {
         this.id = this.$route.params.id || this.$route.query.id;
         this.ajaxGetDetail();
+        console.warn("found 初始化")
     },
     // eslint-disable-next-line
     beforeRouteEnter(to, from, next) {
@@ -34,8 +35,8 @@ export default {
     },
     methods: {
         ajaxGetDetail() {
-            console.log("found");
-            console.log(this.id);
+            // console.log("found");
+            // console.log(this.id);
         }
     },
     components: {},

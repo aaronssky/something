@@ -1,5 +1,5 @@
 export default {
-    name: "page",
+    name: "page-about",
     data() {
         return {
             id: "",
@@ -16,6 +16,8 @@ export default {
     created() {
         this.id = this.$route.params.id;
         this.ajaxGetDetail();
+        console.warn("about 初始化");
+        console.error(this.a)
     },
     // eslint-disable-next-line
     beforeRouteEnter(to, from, next) {
@@ -24,10 +26,35 @@ export default {
             // console.log("导航被确认后回调，mounted之后")
         });
     },
+    beforeRouteLeave(to, from, next) {
+        console.warn(to)
+        console.warn(from)
+        let routerHistory = global.routerHistory;
+        let index = routerHistory.indexOf(to.fullPath)
+        // if (to.path === '/') {
+        //   next('/TabHome')
+        //   return false
+        // }
+
+        if (index !== -1) {
+            console.log("hou2")
+            // this.$destroy();
+
+        } else {
+            console.log("qian2")
+            // this.$route.meta.keepAlive = 11;
+        }
+        // this.$destroy();
+        next();
+    },
     methods: {
         ajaxGetDetail() {
-            console.log("about");
-            console.log(this.id);
+            // console.log("about");
+            // console.log(this.id);
+        },
+        toPageProduct(productId) {
+
+            console.log("跳转到产品详情页", productId);
         }
     },
     components: {},

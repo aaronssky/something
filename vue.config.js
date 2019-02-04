@@ -2,7 +2,8 @@ const path = require('path')
 const debug = process.env.NODE_ENV !== 'production'
 
 module.exports = {
-    publicPath: "", // 根域上下文目录
+    baseUrl: "",
+    // publicPath: "", // 根域上下文目录
     outputDir: 'dist', // 构建输出目录
     assetsDir: 'assets', // 静态资源目录 (js, css, img, fonts)
     lintOnSave: true, // 是否开启eslint保存检测，有效值：ture | false | 'error'
@@ -61,6 +62,6 @@ module.exports = {
                 changOrigin: true
             }
         },
-        before: app => { }
+        before: app => {}
     }
 }
