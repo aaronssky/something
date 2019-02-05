@@ -12,11 +12,15 @@ window.mobileUtil.fixScreen();
 Vue.config.productionTip = false;
 
 let AppVueData = {
-    // 与routerHistory同步记录当前处于缓存的组件名称
-    // 用于处理前进不缓存，后退缓存
-    keepAlive: [],
+    // 与routerHistory同步记录当前处于缓存的组件名称，用于处理前进不缓存，后退缓存
+    // router文件配置的meta.componentName字段定义是否需要缓存页面级别组件
+    // page-index为导航整个首页的组件名称
+    keepAlive: ['page-index'],
+
+    // 用来控制变换前进后退的过渡效果
+    tName: "slide-next",
 };
-global.keepAlive = AppVueData.keepAlive = ['page-index'];
+global.keepAlive = AppVueData.keepAlive;
 
 function unKeepAlive(name) {
     for (let i = 0; i < AppVueData.keepAlive.length; i++) {

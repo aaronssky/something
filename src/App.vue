@@ -71,7 +71,7 @@
         overflow-y: auto;
     }
 
-    $slideDuration: 15.6s;
+    $slideDuration: .6s;
 
     /* Enter and leave animations can use different */
     /* durations and timing functions.              */

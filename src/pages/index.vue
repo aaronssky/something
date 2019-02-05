@@ -24,6 +24,7 @@
 <script>
     import MainNav from "@/components/MainNav.vue";
     export default {
+        // 导航首页组件名称
         name: "page-index",
         data() {
             return {
@@ -31,7 +32,7 @@
             };
         },
         created() {
-            console.log("初始化应用首页");
+            console.log("初始化应用导航首页");
         },
         mounted() {},
         components: {
