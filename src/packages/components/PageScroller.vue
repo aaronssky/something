@@ -1,5 +1,5 @@
 <template>
-    <div class="page page-scroller">
+    <div class="page-scroller">
         {{msg}}
         <slot></slot>
     </div>
@@ -12,33 +12,20 @@
             msg: String
         },
         mounted() {
-            console.log(345)
+            console.log("初始化PageScroller组件");
+
+        },
+        watch: {
+            '$route'(to, from) {
+                //这样就可以获取到变化的参数了，然后执行参数变化后相应的逻辑就行了
+                // console.log(this.$route);
+                // this.ajaxGetDetail();
+            }
         }
     };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-    .main-nav {
-        position: fixed;
-        bottom: 0;
-        height: 100px;
-        width: 100%;
-        display: flex;
-        background-color: rgb(230, 230, 230);
-
-        .item {
-            flex: 1;
-
-            a {
-                font-weight: bold;
-                color: #a8b8c9;
-
-                &.router-link-exact-active {
-                    color: #42b983;
-                }
-            }
-        }
-
-    }
+    
 </style>

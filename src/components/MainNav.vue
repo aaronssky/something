@@ -34,6 +34,7 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
     .main-nav {
+        // transform:translateZ(0);
         position: fixed;
         bottom: 0;
         height: 100px;
@@ -54,5 +55,23 @@
             }
         }
 
+    }
+
+    // 以下兼容切换页面过度时候导航的样式兼容
+    // 未测试安卓
+    .slide-next {
+        &-leave-active {
+            .main-nav {
+                transform: translateZ(0);
+            }
+        }
+    }
+
+    .slide-prev {
+        &-enter-active {
+            .main-nav {
+                transform: translateZ(0);
+            }
+        }
     }
 </style>

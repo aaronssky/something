@@ -53,7 +53,7 @@ export default {
             // console.log(this.id);
         },
         toPageProduct(productId) {
-
+            this.$router.push(`/product?tt=${productId}`);
             console.log("跳转到产品详情页", productId);
         }
     },

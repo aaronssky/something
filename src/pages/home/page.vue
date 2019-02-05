@@ -1,5 +1,5 @@
 <template>
-    <div class="home">
+    <div class="page-home">
         <!-- <img alt="Vue logo" src="@/assets/logo.png"> -->
         <div>{{a}}</div>
         <div>111</div>
@@ -38,7 +38,10 @@
         <div>111</div>
         <div>111</div>
         <div>111</div>
-        首页
+        <div>111</div>
+        <div>111</div>
+        <div>111</div>
+        <div>bottom</div>
     </div>
 </template>
 
