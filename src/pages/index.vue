@@ -1,5 +1,5 @@
 <template>
-    <PageScroller class="page">
+    <div class="page">
         <!-- 以下布局样式兼容滚动时候的过渡切换效果 -->
         <div class="page-index">
             <!-- <div>{{($route.meta)}}</div> -->
@@ -18,7 +18,7 @@
             <!-- 底部导航栏组件 -->
             <main-nav />
         </div>
-    </PageScroller>
+    </div>
 </template>
 
 <script>
@@ -51,7 +51,7 @@
             // bottom: 100px;
             // top: 0;
             overflow: hidden;
-            overflow-y: scroll;
+            // overflow-y: scroll;
             -webkit-overflow-scrolling: touch;
             padding-bottom: 100px;
             height: 100%;

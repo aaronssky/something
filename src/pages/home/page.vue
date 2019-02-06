@@ -1,5 +1,5 @@
 <template>
-    <div class="page-home">
+    <PageScroller class="page-home">
         <!-- <img alt="Vue logo" src="@/assets/logo.png"> -->
         <div>{{a}}</div>
         <div>111</div>
@@ -42,7 +42,7 @@
         <div>111</div>
         <div>111</div>
         <div>bottom</div>
-    </div>
+    </PageScroller>
 </template>
 
 <script>

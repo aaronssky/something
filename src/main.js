@@ -54,6 +54,7 @@ let routerHistory = ["/home"];
 let routerFalg = false;
 router.beforeEach(function (to, from, next) {
 
+    // console.error("before")
     // console.log("beforeEach");
     // console.log(to);
     if (to.meta && to.meta.pageTitle) {
@@ -114,6 +115,7 @@ router.beforeEach(function (to, from, next) {
 });
 
 router.afterEach((to, from) => {
+    // console.error("after")
     // from.meta.keepAlive = false;
 
     // console.log("afterEach");
