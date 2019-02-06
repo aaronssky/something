@@ -1,5 +1,5 @@
 <template>
-    <div class="page-scroller">
+    <div class="page-scroller" :scrollerkey="scrollerkey">
         <slot></slot>
     </div>
 </template>
@@ -24,7 +24,7 @@
             // console.log("初始化PageScroller组件");
             // console.log(this.$el);
             this.scrollerkey = this.uniqueKey || this.$route.fullPath;
-
+            // this.scrollerkey = Math.random();
             // 初始化全局变量
             window.PageScroller = window.PageScroller || {};
             window.PageScroller[this.scrollerkey] = {};
@@ -69,7 +69,8 @@
 
                 // this.ajaxGetDetail();
             }
-        }
+        },
+        inheritAttrs: true
     };
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-    <PageScroller class="product page">
+    <PageScroller class="page page-product">
         <h1>an product page {{id}}</h1>
         <h1> {{a}}</h1>
         <h1> {{a}}</h1>
