@@ -58,7 +58,7 @@ export default new Router({
         meta: {
             pageTitle: "关于",
             keepAlive: false,
-            componentName: "page-about"
+            componentName: "page-about", // 供keepalive include使用
         }
     }, {
         path: "/product",
@@ -72,7 +72,7 @@ export default new Router({
         meta: {
             pageTitle: "xq",
             keepAlive: false,
-            componentName: "page-product"
+            componentName: "page-product", // 供keepalive include使用
         }
     }, ]
 });

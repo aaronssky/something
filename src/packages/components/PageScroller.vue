@@ -1,5 +1,5 @@
 <template>
-    <div class="page-scroller" :scrollerkey="scrollerkey">
+    <div class="page-scroller" :id="id || `PageScroller-${scrollerKey}`" :data-key="scrollerKey">
         <slot></slot>
     </div>
 </template>
@@ -9,7 +9,7 @@
         name: "PageScroller",
         data() {
             return {
-                scrollerkey: ""
+                scrollerKey: ""
             };
         },
         props: {
@@ -19,15 +19,27 @@
                 type: String,
                 default: "",
             },
+            id: {
+                type: String,
+                default: "",
+            }
         },
         mounted() {
+
+            let createUnikeyKey = () => {
+                if (this.$route.meta && ~~this.$route.meta.PageScrollerIndex >= 0) {
+                    this.$route.meta.PageScrollerIndex = ~~this.$route.meta.PageScrollerIndex + 1;
+                }
+                let index = this.$route.meta.PageScrollerIndex;
+                return this.$route.fullPath + `-${index}`;
+            }
             // console.log("初始化PageScroller组件");
             // console.log(this.$el);
-            this.scrollerkey = this.uniqueKey || this.$route.fullPath;
+            this.scrollerKey = this.uniqueKey || createUnikeyKey();
             // this.scrollerkey = Math.random();
             // 初始化全局变量
             window.PageScroller = window.PageScroller || {};
-            window.PageScroller[this.scrollerkey] = {};
+            window.PageScroller[this.scrollerKey] = {};
 
             this.addEvent();
 
@@ -39,19 +51,19 @@
                 this.$el.addEventListener("scroll", function (e) {
                     // console.log(this.scrollTop)
                     let PageScroller = window.PageScroller;
-                    let scrollerkey = that.scrollerkey;
-                    let scrollerObj = PageScroller[scrollerkey] || {};
+                    let scrollerKey = that.scrollerKey;
+                    let scrollerObj = PageScroller[scrollerKey] || {};
                     scrollerObj["x"] = this.scrollLeft;
                     scrollerObj["y"] = this.scrollTop;
                     scrollerObj["el"] = this;
-                    window.PageScroller[scrollerkey] = scrollerObj;
+                    window.PageScroller[scrollerKey] = scrollerObj;
 
                 })
             },
             // 根据key值进行定位
-            resetScroll(scrollerkey) {
+            resetScroll(scrollerKey) {
                 let PageScroller = window.PageScroller;
-                let scrollerObj = PageScroller[scrollerkey];
+                let scrollerObj = PageScroller[scrollerKey];
                 if (scrollerObj) {
                     let el = scrollerObj["el"] || this.$el;
                     el.scrollLeft = scrollerObj["x"] || 0;
@@ -65,7 +77,7 @@
                 //这样就可以获取到变化的参数了，然后执行参数变化后相应的逻辑就行了
                 // console.warn("update");
                 // console.warn(to);
-                this.resetScroll(this.scrollerkey || to.fullPath);
+                this.resetScroll(this.scrollerKey);
 
                 // this.ajaxGetDetail();
             }

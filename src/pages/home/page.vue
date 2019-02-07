@@ -7,7 +7,7 @@
         <div>111</div>
         <div>111</div>
         <div>111</div>
-        <PageScroller unique-key="home-test" class="home-test">
+        <PageScroller unique-key="home-test" id="aaa" class="home-test">
             <p>1</p>
             <p>1</p>
             <p>1</p>
