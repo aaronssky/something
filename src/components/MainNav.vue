@@ -48,6 +48,8 @@
             a {
                 font-weight: bold;
                 color: #a8b8c9;
+                display: block;
+                height: 100%;
 
                 &.router-link-exact-active {
                     color: #42b983;

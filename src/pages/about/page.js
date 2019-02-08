@@ -27,10 +27,8 @@ export default {
         });
     },
     beforeRouteLeave(to, from, next) {
-        console.warn(to)
-        console.warn(from)
-        let routerHistory = global.routerHistory;
-        let index = routerHistory.indexOf(to.fullPath)
+        let RouterHistory = global.RouterHistory;
+        let index = RouterHistory.indexOf(to.fullPath)
         // if (to.path === '/') {
         //   next('/TabHome')
         //   return false

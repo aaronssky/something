@@ -16,7 +16,7 @@ const install = function (Vue) {
     // Vue.prototype.$loading = WLoadingBar
 }
 
-// 打包出的js文件，加载后自动执行vue.use
+// 若单独打包引用，加载打包出的js文件后自动执行vue.use
 if (typeof window !== 'undefined' && window.Vue) {
     install(window.Vue)
 }

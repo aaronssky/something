@@ -26,17 +26,16 @@
         },
         mounted() {
 
-            let createUnikeyKey = () => {
+            let createUniqueKey = () => {
                 if (this.$route.meta && ~~this.$route.meta.PageScrollerIndex >= 0) {
                     this.$route.meta.PageScrollerIndex = ~~this.$route.meta.PageScrollerIndex + 1;
                 }
                 let index = this.$route.meta.PageScrollerIndex;
                 return this.$route.fullPath + `-${index}`;
             }
-            // console.log("初始化PageScroller组件");
-            // console.log(this.$el);
-            this.scrollerKey = this.uniqueKey || createUnikeyKey();
-            // this.scrollerkey = Math.random();
+
+            this.scrollerKey = this.uniqueKey || createUniqueKey();
+
             // 初始化全局变量
             window.PageScroller = window.PageScroller || {};
             window.PageScroller[this.scrollerKey] = {};
@@ -74,12 +73,7 @@
         },
         watch: {
             '$route'(to, from) {
-                //这样就可以获取到变化的参数了，然后执行参数变化后相应的逻辑就行了
-                // console.warn("update");
-                // console.warn(to);
                 this.resetScroll(this.scrollerKey);
-
-                // this.ajaxGetDetail();
             }
         },
         inheritAttrs: true

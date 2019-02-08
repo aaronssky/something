@@ -12,7 +12,7 @@ window.mobileUtil.fixScreen();
 Vue.config.productionTip = false;
 
 let AppVueData = {
-    // 与routerHistory同步记录当前处于缓存的组件名称，用于处理前进不缓存，后退缓存
+    // 与RouterHistory同步记录当前处于缓存的组件名称，用于处理前进不缓存，后退缓存
     // router文件配置的meta.componentName字段定义是否需要缓存页面级别组件
     // page-index为导航整个首页的组件名称
     keepAlive: ['page-index'],
@@ -49,7 +49,7 @@ function addKeepAlive(name) {
 
 // 记录当前路由跳转的完整路径，用以判断是否前进后退切换换页过度效果
 // 增加/home为了兼容首次打开页面进入其他（二级）页面返回异常
-let routerHistory = ["/home"];
+let RouterHistory = ["/home"];
 
 let routerFalg = false;
 router.beforeEach(function (to, from, next) {
@@ -64,41 +64,36 @@ router.beforeEach(function (to, from, next) {
     }
 
     // if (to.path === '/home') {
-    //     routerHistory = []
+    //     RouterHistory = []
     // }
 
-    let index = routerHistory.indexOf(to.fullPath)
+    let index = RouterHistory.indexOf(to.fullPath)
     // if (to.path === '/') {
     //   next('/TabHome')
     //   return false
     // }
 
     if (index !== -1) {
-        routerHistory = routerHistory.slice(0, index + 1)
+        RouterHistory = RouterHistory.slice(0, index + 1)
         console.log('后')
         AppVueData.tName = 'slide-prev';
-        // setTimeout(function () {
-        //     console.log(from,"设置false")
-        //     from.meta.keepAlive = false;
-        // }, 400);
-        // to.meta.keepAlive = true;
-        // from.meta.keepAlive = false;
 
-        unKeepAlive(from.meta.componentName);
+        if (from.meta.componentName) {
+            // 后退设置上一页不缓存
+            unKeepAlive(from.meta.componentName);
+        }
     } else {
-        routerHistory.push(to.fullPath)
+        RouterHistory.push(to.fullPath)
         console.log('前进')
         AppVueData.tName = 'slide-next';
-        // from.meta.keepAlive = true;
-        // 先设置好true再next，才会被首次缓存
-        to.meta.keepAlive = true;
 
         if (to.meta.componentName) {
+            // 前进设置下一页的缓存
             addKeepAlive(to.meta.componentName)
         }
     }
-    global.routerHistory = routerHistory
-    console.log(routerHistory)
+    global.RouterHistory = RouterHistory
+    console.log(RouterHistory)
 
     // 以下为了处理多个transition标签延迟
     if (!routerFalg) {
