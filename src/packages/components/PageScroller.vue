@@ -69,6 +69,8 @@
                 this.style = `transform:translate3d(0,0,0)`;
 
                 this.$el.addEventListener("touchstart", function (e) {
+
+
                     let touches = e.touches || [],
                         touchOne = touches[0],
                         touchOneX = touchOne.pageX,
@@ -85,6 +87,16 @@
                 })
 
                 this.$el.addEventListener("touchmove", function (e) {
+
+                    // 增加暂时禁止滚动的元素，用来处理滚动父子级穿透
+                    let $curScrollEl = $(that.$el);
+                    let $parents = $curScrollEl.parents() || [];
+                    $parents.addClass("overflow-hidden-temp");
+
+                    // setTimeout(() => {
+                    //     $parents.removeClass("overflow-hidden-temp");
+                    // },100)
+
                     let touches = e.touches || [],
                         touchOne = touches[0],
                         touchOneX = touchOne.pageX,
@@ -100,7 +112,7 @@
                     }
 
                     if (touchOneDist > 0 && that.isAtScrollTop) {
-                        console.log(4)
+                        // console.log(4)
                         e._isScroller = true;
                         if (touchOneDist - touchStartScrollTop < 0) {
                             that.style = `transform:translate3d(0,0,0)`;
@@ -114,10 +126,8 @@
                             that.style = `transform:translate3d(0,0,0)`;
                         }
                     }
-                    // console.warn(touchOneDist, that.isAtScrollTop, that.topPlaceHolderHeight, this
-                    //     .scrollTop)
-                    // e.stopPropagation();
-                    // console.log(11)
+
+                    e.stopPropagation();
                 })
 
                 this.$el.addEventListener("touchend", function (e) {
@@ -128,7 +138,9 @@
                         that.touches = [];
                     }
 
-                    // console.log(touchOneY);
+                    // 移除暂时禁止滚动的元素
+                    $(".overflow-hidden-temp").removeClass("overflow-hidden-temp");
+
                     // e.preventDefault();
                     e.stopPropagation();
                 })
@@ -141,10 +153,14 @@
                     }
                     // that.tips = evt._isScroller;
 
+                    e.stopPropagation();
                 })
 
                 // 监听滚动到顶端
                 this.$el.addEventListener("scroll", function (e) {
+
+
+
 
                     // 到达了滚动条顶部
                     if (this.scrollTop <= 1) {
@@ -159,6 +175,8 @@
                     } else {
                         that.isAtScrollTop = false;
                     }
+                    e.stopPropagation();
+
                 })
             },
             // 添加滚动监听事件，记录当前el滚动坐标
@@ -194,6 +212,8 @@
                         this.scrollTop = (this.scrollHeight - this.clientHeight - 1);
                     }
 
+                    e.stopPropagation();
+
                 })
             },
             // 根据key值进行定位
@@ -218,11 +238,11 @@
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
+<style scope lang="scss">
     .page-scroller {
 
         &.page-scroller-overflow-hidden {
-            overflow: hidden;
+            overflow: hidden !important;
         }
 
         .page-scroller-top-placeholder {
@@ -233,6 +253,7 @@
             position: relative;
 
             .page-scroller-top-placeholder-contain {
+                background: inherit;
                 position: absolute;
                 width: 100%;
                 top: 0;
