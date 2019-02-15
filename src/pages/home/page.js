@@ -4,12 +4,19 @@ export default {
     name: "page-home",
     data: () => {
         return {
-            a: Math.random()
+            a: Math.random(),
+            i: 1
         };
     },
-    created(){
+    created() {
         console.warn("home 初始化")
 
+    },
+    methods: {
+        aa() {
+            $(".page-scroller-transition").css({
+            });
+        }
     },
     components: {
         HelloWorld

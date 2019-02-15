@@ -2,11 +2,16 @@
     // padding-bottom: 100px;
     height: 100%;
     overflow: auto;
+    background-color: pink;
 
     .home-test {
         max-height: 300px;
         background-color: gray;
         overflow: hidden;
         overflow-y: auto;
+    }
+
+    /deep/ .page-scroller-top-placeholder{
+        background-color: #fff;
     }
 }

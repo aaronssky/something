@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <div>{{tName}}</div>
+        <!-- <div>134567889</div> -->
         <!-- <div id="nav">
             <router-link to="/home">Home</router-link> |
             <router-link :to="{path:'/about/1', query:{tt:44}}">About1</router-link> |
@@ -51,6 +51,10 @@
 </script>
 
 <style lang="scss">
+    body {
+        overflow: hidden;
+    }
+
     #app {
         font-family: "Avenir", Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
@@ -58,6 +62,10 @@
         text-align: center;
         color: #2c3e50;
         font-size: 28px;
+        max-width: 100%;
+        width: 100%;
+        display: inline-block;
+        overflow: hidden;
     }
 
     .page {
@@ -155,5 +163,9 @@
 
             // opacity: 0;
         }
+    }
+
+    .overflow-hidden-temp {
+        overflow: hidden !important;
     }
 </style>
