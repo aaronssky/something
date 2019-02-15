@@ -28,6 +28,7 @@
             return {
                 scrollerKey: "",
                 isAtScrollTop: true, //是否滚动条到达顶部，继续下拉刷新
+                isAtScrollBottom: false,
                 style: "",
                 overflowHidden: false,
                 touches: [],
@@ -101,7 +102,7 @@
                     return /qqbrowser/.test(ua) ? true : false;
                 }
 
-                
+
 
                 let browser = {
                     feature: function () {
@@ -199,9 +200,13 @@
 
                     if (touchOneDist > 0 && that.isAtScrollTop) {
 
-                        // 安卓低端版本微信端才需要这样，用户体验向下兼容
                         if (that.compatibleMode) {
+                            // 安卓低端版本微信端或QQ浏览器交互处理，用户体验向下兼容
+
+                            // 用以禁止顶端下拉时候会把页面也拉下，故牺牲用户体验，向下兼容
                             e.preventDefault();
+
+                            // 当本来已经处于顶端时候才允许触发下拉
                             if (that.touchStartIsAtScrollTop) {
                                 if (touchOneDist - touchStartScrollTop < 0) {
                                     that.style = `transform:translate3d(0,0,0)`;
@@ -210,6 +215,7 @@
                                         `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
                                 }
                             }
+                            
                         } else {
                             if (touchOneDist - touchStartScrollTop < 0) {
                                 that.style = `transform:translate3d(0,0,0)`;
@@ -221,7 +227,39 @@
 
                     } else {
                         that.touchStartIsAtScrollTop = false;
-                        if (that.overflowHidden) {
+                        if (that.overflowHidden && touchOneDist > 0) {
+                            that.overflowHidden = false;
+                            that.style = `transform:translate3d(0,0,0)`;
+                        }
+                    }
+
+
+                    if (touchOneDist < 0 && that.isAtScrollBottom) {
+                        // 点击时候相对底部的位置
+                        let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this.clientHeight;
+
+                        if (that.compatibleMode) {
+                            // 安卓低端版本微信端才需要这样，用户体验向下兼容
+                            e.preventDefault();
+                            if (touchOneDist + touchStartOffsetBottom > 0) {
+                                that.style = `transform:translate3d(0,0,0)`;
+                            } else {
+                                that.style =
+                                    `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+                            }
+                        } else {
+                            console.log(touchOneDist, touchStartOffsetBottom)
+
+                            if (touchOneDist + touchStartOffsetBottom > 0) {
+                                that.style = `transform:translate3d(0,0,0)`;
+                            } else {
+                                that.style =
+                                    `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+                            }
+                        }
+
+                    } else {
+                        if (that.overflowHidden && touchOneDist < 0) {
                             that.overflowHidden = false;
                             that.style = `transform:translate3d(0,0,0)`;
                         }
@@ -260,16 +298,16 @@
                     e.stopPropagation();
                 });
 
-                document.body.addEventListener("touchmove1", function (e) {
-                    //In this case, the default behavior is scrolling the body, which
-                    //would result in an overflow.  Since we don't want that, we preventDefault.
-                    if (e._isScroller) {
-                        e.preventDefault();
-                    }
-                    // that.tips = evt._isScroller;
+                // document.body.addEventListener("touchmove1", function (e) {
+                //     //In this case, the default behavior is scrolling the body, which
+                //     //would result in an overflow.  Since we don't want that, we preventDefault.
+                //     if (e._isScroller) {
+                //         e.preventDefault();
+                //     }
+                //     // that.tips = evt._isScroller;
 
-                    // e.stopPropagation();
-                });
+                //     // e.stopPropagation();
+                // });
 
                 // 监听滚动到顶端
                 this.$el.addEventListener("scroll", function (e) {
@@ -278,7 +316,7 @@
                         that.isAtScrollTop = true;
 
                         if (that.touches && that.touches.length > 0) {
-                            // 触摸状态的手指往下滑
+                            // 触摸状态上下滑动滚动条会滚动影响体验，故禁止滚动
                             that.overflowHidden = true;
                         } else {
                             // 松开手指后的滚动条持续滚动
@@ -286,6 +324,20 @@
                     } else {
                         that.isAtScrollTop = false;
                     }
+
+                    if (this.scrollHeight <= this.clientHeight + this.scrollTop + 1) {
+                        that.isAtScrollBottom = true;
+
+                        if (that.touches && that.touches.length > 0) {
+                            // 触摸状态上下滑动滚动条会滚动影响体验，故禁止滚动
+                            that.overflowHidden = true;
+                        } else {
+                            // 松开手指后的滚动条持续滚动
+                        }
+                    } else {
+                        that.isAtScrollBottom = false;
+                    }
+
                     e.stopPropagation();
                 });
             },
@@ -300,7 +352,7 @@
 
                 let that = this;
                 this.$el.addEventListener("scroll", function (e) {
-                    console.log(this.scrollTop)
+                    // console.log(this.scrollTop)
                     let PageScroller = window.PageScroller;
                     let scrollerKey = that.scrollerKey;
                     let scrollerObj = PageScroller[scrollerKey] || {};
@@ -333,6 +385,73 @@
                     el.scrollLeft = scrollerObj["x"] || 0;
                     el.scrollTop = scrollerObj["y"] || 0;
                 }
+
+                /*
+                var weights = [1, 2, 3, 4, 5, 6];
+                var values = [2, 5, 31, 3, 56, 8];
+                var bagWeight = 10;
+
+                function getMax(weights, values, bagWeight) {
+                    var arr = [];
+                    for (var i = 0; i < weights.length; i++) {
+                        arr.push({
+                            value: values[i],
+                            weight: weights[i],
+                            v: values[i] / weights[i]
+                        });
+                    }
+                    let weight, value, maxWeight = 0,
+                        maxValue = 0;
+                    // for (var i = 0; i < arr.length; i++) {
+                    //     weight = arr[i].weight;
+                    //     value = arr[i].value;
+                    //     arr[i].v = value / weight;
+                    // }
+                    arr = arr.sort((a, b) => b.v - a.v);
+                    console.log(arr);
+                    for (var i = 0; i < arr.length; i++) {
+
+                        if (maxWeight + arr[i].weight <= bagWeight) {
+                            maxWeight += arr[i].weight;
+                            maxValue += arr[i].value;
+                        }
+                    }
+                    return {
+                        maxWeight: maxWeight,
+                        maxValue: maxValue
+                    }
+                }
+
+                function knapsack(weights, values, w) {
+                    var n = weights.length - 1; //获取物品个数
+                    var f = [
+                        []
+                    ]; //定义f的矩阵
+                    for (var j = 0; j <= w; j++) {
+                        if (j < weights[0]) { //容量当不下物品0的重量，价值为0
+                            f[0][j] = 0;
+                        } else {
+                            f[0][j] = values[0]; //否则容量为物品0的价值
+                        }
+                    }
+                    for (var j = 0; j <= w; j++) {
+                        for (var i = 1; i <= n; i++) {
+                            if (!f[i]) { //创建新的一行
+                                f[i] = [];
+                            }
+                            if (j < weights[i]) { //等于之前的最优值
+                                f[i][j] = f[i - 1][j];
+                            } else {
+                                f[i][j] = Math.max(f[i - 1][j], f[i - 1][j - weights[i]] + values[i]);
+                            }
+                        }
+                    }
+                    return f[n][w];
+                }
+
+                console.log(getMax(weights, values, bagWeight));
+                console.log(knapsack(weights, values, bagWeight));
+                */
             }
         },
         watch: {
