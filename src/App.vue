@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <div>134567889</div>
+        <!-- <div>134567889</div> -->
         <!-- <div id="nav">
             <router-link to="/home">Home</router-link> |
             <router-link :to="{path:'/about/1', query:{tt:44}}">About1</router-link> |

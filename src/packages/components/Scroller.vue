@@ -8,22 +8,15 @@
             </div>
         </div>
         <div class="page-scroller-contain" :class="{'page-scroller-transition':touches.length==0}" :style="style">
-            <div style="    word-wrap: break-word;">{{browser}}</div>
+            <div>{{tips}}</div>
             <slot></slot>
         </div>
-        <div class="page-scroller-bottom-placeholder">
-            <div class="page-scroller-bottom-placeholder-contain">
-                {{style}}
-                <h1>上拉加载</h1>
-            </div>
-        </div>
-        <div class="pp"></div>
     </div>
 </template>
 
 <script>
     export default {
-        name: "PageScroller",
+        name: "Scroller",
         data() {
             return {
                 scrollerKey: "",
@@ -31,11 +24,9 @@
                 style: "",
                 overflowHidden: false,
                 touches: [],
-                browser: "",
+                tips: "",
                 isAndroid: false,
-                isIos: false,
-                isWX: false,
-                compatibleMode: false, // 低端机型用户体验向下兼容模式
+                isIos: true,
             };
         },
         props: {
@@ -51,9 +42,6 @@
             }
         },
         mounted() {
-            this.init();
-
-            // 创建唯一key
             let createUniqueKey = () => {
                 if (this.$route.meta && ~~this.$route.meta.PageScrollerIndex >= 0) {
                     this.$route.meta.PageScrollerIndex = ~~this.$route.meta.PageScrollerIndex + 1;
@@ -73,67 +61,6 @@
             this.addTouchEvent();
         },
         methods: {
-            init() {
-                function isWX() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    return /micromessenger/.test(ua) ? true : false;
-                }
-
-                function isIos() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    if (/iphone|ipad|ipod/.test(ua)) {
-                        return true;
-                    } else if (/android/.test(ua)) {
-                        return false
-                    }
-                }
-
-                function isAndroid() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    if (/android/.test(ua)) {
-                        return true;
-                    }
-                    return false;
-                }
-
-                function isQQBrowser() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    return /qqbrowser/.test(ua) ? true : false;
-                }
-
-                
-
-                let browser = {
-                    feature: function () {
-                        var u = navigator.userAgent;
-                        return {
-                            trident: u.indexOf('Trident') > -1, //IE内核
-                            presto: u.indexOf('Presto') > -1, //opera内核
-                            webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
-                            gecko: u.indexOf('Firefox') > -1, //火狐内核Gecko
-                            mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
-                            ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios
-                            android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android
-                            iPhone: u.indexOf('iPhone') > -1, //iPhone
-                            iPad: u.indexOf('iPad') > -1, //iPad
-                            webApp: u.indexOf('Safari') > -1, //【待定】是否第三方浏览器Safari（QQ，微信内置浏览器没该属性）
-                            wx: u.indexOf('MicroMessenger') > -1, // 微信内置浏览器
-                            qq: u.indexOf('QBWebView') > -1, // QQ内置浏览器
-                            qqBrowser: u.indexOf('MQQBrowser') > -1, // QQ浏览器（非QQ内置浏览器）
-                        };
-                    }()
-                };
-
-                this.browser = JSON.stringify(browser) + " ================= " + navigator.userAgent;
-
-                this.isWX = browser.feature.wx;
-                this.isIos = browser.feature.ios;
-                this.isAndroid = browser.feature.android;
-                this.isQQBrowser = browser.feature.qqBrowser;
-
-                // 安卓低版本向下兼容，需要加安卓系统版本判断
-                this.compatibleMode = (this.isWX || this.isQQBrowser) && this.isAndroid;
-            },
             addTouchEvent() {
                 let that = this;
 
@@ -200,7 +127,7 @@
                     if (touchOneDist > 0 && that.isAtScrollTop) {
 
                         // 安卓低端版本微信端才需要这样，用户体验向下兼容
-                        if (that.compatibleMode) {
+                        if (that.isAndroid) {
                             e.preventDefault();
                             if (that.touchStartIsAtScrollTop) {
                                 if (touchOneDist - touchStartScrollTop < 0) {
@@ -237,20 +164,6 @@
                         that.style = `transform:translate3d(0,0,0)`;
                         that.overflowHidden = false;
                         that.touches = [];
-
-                        // IOS体验兼容
-                        // 下拉时候，transition元素移动会引起滚动条变高，从而底部产生奇葩的空间，故通过元素高度改动，触发重绘
-                        if (that.isIos) {
-                            $(that.$el).find(".pp").css({
-                                "padding-bottom": "1px"
-                            });
-
-                            setTimeout(() => {
-                                $(that.$el).find(".pp").css({
-                                    "padding-bottom": "0"
-                                });
-                            })
-                        }
                     }
 
                     // 移除暂时禁止滚动的元素
@@ -300,7 +213,7 @@
 
                 let that = this;
                 this.$el.addEventListener("scroll", function (e) {
-                    console.log(this.scrollTop)
+                    // console.log(this.scrollTop)
                     let PageScroller = window.PageScroller;
                     let scrollerKey = that.scrollerKey;
                     let scrollerObj = PageScroller[scrollerKey] || {};
@@ -347,11 +260,6 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scope lang="scss">
     .page-scroller {
-        position: relative;
-        max-height: 100%;
-        overflow: auto;
-        background: inherit;
-
         &.page-scroller-overflow-hidden {
             overflow: hidden !important;
         }
@@ -371,25 +279,8 @@
             }
         }
 
-        .page-scroller-bottom-placeholder {
-            width: 100%;
-            // bottom: 0;
-            // left: 0;
-            // overflow: hidden;
-            position: absolute;
-            transform: translateY(-100%);
-
-            .page-scroller-bottom-placeholder-contain {
-                background: inherit;
-                position: relative;
-                width: 100%;
-                top: 0;
-            }
-        }
-
         .page-scroller-contain {
             position: relative;
-            z-index: 1;
             background: inherit;
             // will-change: transform;
 
