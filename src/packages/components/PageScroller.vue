@@ -8,7 +8,7 @@
             </div>
         </div>
         <div class="page-scroller-contain" :class="{'page-scroller-transition':touches.length==0}" :style="style">
-            <div style="    word-wrap: break-word;">{{browser}}</div>
+            <div style="    word-wrap: break-word;" v-html="browser"></div>
             <slot></slot>
         </div>
         <div class="page-scroller-bottom-placeholder">
@@ -119,21 +119,21 @@
                             iPad: u.indexOf('iPad') > -1, //iPad
                             webApp: u.indexOf('Safari') > -1, //【待定】是否第三方浏览器Safari（QQ，微信内置浏览器没该属性）
                             wx: u.indexOf('MicroMessenger') > -1, // 微信内置浏览器
-                            qq: u.indexOf('QBWebView') > -1, // QQ内置浏览器
-                            qqBrowser: u.indexOf('MQQBrowser') > -1, // QQ浏览器（非QQ内置浏览器）
+                            qq: u.indexOf('QBWebView') > -1, // QQ内置浏览器（暂未严谨测试）
+                            x5Browser: u.indexOf('MQQBrowser') > -1, // 腾讯X5内核浏览器
                         };
                     }()
                 };
 
-                this.browser = JSON.stringify(browser) + " ================= " + navigator.userAgent;
+                this.browser = JSON.stringify(browser) + " <br> <br> " + navigator.userAgent;
 
                 this.isWX = browser.feature.wx;
                 this.isIos = browser.feature.ios;
                 this.isAndroid = browser.feature.android;
-                this.isQQBrowser = browser.feature.qqBrowser;
+                this.x5Browser = browser.feature.x5Browser;
 
                 // 安卓低版本向下兼容，需要加安卓系统版本判断
-                this.compatibleMode = (this.isWX || this.isQQBrowser) && this.isAndroid;
+                this.compatibleMode = this.x5Browser;
             },
             addTouchEvent() {
                 let that = this;
