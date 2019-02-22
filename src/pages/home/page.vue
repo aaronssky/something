@@ -1,9 +1,9 @@
 <template>
     <div class="page-home">
-        <PageScroller b="23">
+        <PageScroller b="23" :on-reach-top="onReachTop">
             <!-- <img alt="Vue logo" src="@/assets/logo.png"> -->
             <div>{{a}}</div>
-            <div>111</div>
+            <div>{{i}}</div>
             <div>111</div>
             <div>111</div>
             <div>111</div>

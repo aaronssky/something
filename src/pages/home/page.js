@@ -5,7 +5,7 @@ export default {
     data: () => {
         return {
             a: Math.random(),
-            i: 1
+            i: 0
         };
     },
     created() {
@@ -14,8 +14,11 @@ export default {
     },
     methods: {
         aa() {
-            $(".page-scroller-transition").css({
-            });
+            $(".page-scroller-transition").css({});
+        },
+        onReachTop() {
+            ++this.i;
+            console.log("home 到达顶部");
         }
     },
     components: {

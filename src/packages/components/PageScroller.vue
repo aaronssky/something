@@ -49,6 +49,12 @@
             id: {
                 type: String,
                 default: ""
+            },
+            onReachTop: {
+                type: Function,
+                default: function () {
+                    console.log("default onReachTop")
+                }
             }
         },
         mounted() {
@@ -102,8 +108,6 @@
                     return /qqbrowser/.test(ua) ? true : false;
                 }
 
-
-
                 let browser = {
                     feature: function () {
                         var u = navigator.userAgent;
@@ -140,7 +144,26 @@
 
                 let touchStartY, touchStartScrollTop;
 
-                this.style = `transform:translate3d(0,0,0)`;
+                let setTransform = (x = 0, y = 0, z = 0) => {
+
+                    let limit = 150;
+
+                    y = y / 2; // 滑动比例
+
+                    if (y >= limit) {
+                        // 顶端下拉到达阀值
+                        y = limit;
+                    } else if (y <= -limit) {
+                        // 低端上拉到达阀值
+                        y = -limit;
+                    }
+
+                    console.warn(y/limit)
+                    
+                    this.style = `transform:translate3d(${x},${y}px,${z})`;
+                }
+
+                setTransform(0, 0, 0);
 
                 this.$el.addEventListener("touchstart", function (e) {
                     let touches = e.touches || [],
@@ -172,9 +195,9 @@
                     if (that.isIos) {
                         // 增加暂时禁止滚动的元素，用来处理滚动父子级穿透
                         let $curScrollEl = $(that.$el);
-                        let $parents = $curScrollEl.parents() || [];
+                        let $parents = $curScrollEl.parents(".page-scroller") || [];
                         // $curScrollEl.find(".page-scroller").addClass("overflow-hidden-temp");
-                        
+
                         // $parents.addClass("overflow-hidden-temp");
                     }
 
@@ -184,72 +207,112 @@
                         touchOneY = touchOne.pageY,
                         touchOneDist = touchOneY - touchStartY;
 
-                    if (touchOneDist > 0 && that.isAtScrollTop) {
+                    if (that.isAtScrollTop) {
+                        // 当前点击状态是在顶端时候
 
-                        if (that.compatibleMode) {
-                            // 安卓低端版本微信端或QQ浏览器交互处理，用户体验向下兼容
+                        if (touchOneDist > 0) {
+                            // 手指向下滑动时候
 
-                            // 用以禁止顶端下拉时候会把页面也拉下，故牺牲用户体验，向下兼容
-                            e.preventDefault();
+                            if (that.compatibleMode) {
+                                // 安卓低端版本微信端或QQ浏览器交互处理，用户体验向下兼容
 
-                            // 当本来已经处于顶端时候才允许触发下拉
-                            if (that.touchStartIsAtScrollTop) {
+                                // 用以禁止顶端下拉时候会把页面也拉下，故牺牲用户体验，向下兼容
+                                e.preventDefault();
+
+                                // 当本来已经处于顶端时候才允许触发下拉
+                                if (that.touchStartIsAtScrollTop) {
+                                    if (touchOneDist - touchStartScrollTop < 0) {
+                                        setTransform(0, 0, 0);
+
+                                        // that.style = `transform:translate3d(0,0,0)`;
+                                    } else {
+                                        setTransform(0, touchOneDist - touchStartScrollTop, 0);
+
+                                        // that.style = `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
+                                    }
+                                }
+
+                            } else {
                                 if (touchOneDist - touchStartScrollTop < 0) {
-                                    that.style = `transform:translate3d(0,0,0)`;
+                                    // that.style = `transform:translate3d(0,0,0)`;
+                                    setTransform(0, 0, 0);
+
                                 } else {
-                                    that.style =
-                                        `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
+                                    setTransform(0, touchOneDist - touchStartScrollTop, 0);
+                                    // that.style =
+                                    //     `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
                                 }
                             }
 
                         } else {
-                            if (touchOneDist - touchStartScrollTop < 0) {
-                                that.style = `transform:translate3d(0,0,0)`;
-                            } else {
-                                that.style =
-                                    `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
-                            }
+                            // 手指向上滑动时候
+
+                            // 体验兼容模式使用
+                            that.touchStartIsAtScrollTop = false;
+
+                            // 体验优化，处理快速向上滑动时候
+                            setTransform(0, 0, 0);
                         }
 
                     } else {
-                        that.touchStartIsAtScrollTop = false;
-                        if (that.overflowHidden && touchOneDist > 0) {
+
+                        // 貌似可以不用
+                        if (that.overflowHidden) {
                             that.overflowHidden = false;
-                            that.style = `transform:translate3d(0,0,0)`;
+                            // that.style = `transform:translate3d(0,0,0)`;
+                            setTransform(0, 0, 0);
                         }
                     }
 
 
-                    if (touchOneDist < 0 && that.isAtScrollBottom) {
-                        // 点击时候相对底部的位置
-                        let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this.clientHeight;
+                    if (that.isAtScrollBottom) {
 
-                        if (that.compatibleMode) {
-                            // 安卓低端版本微信端才需要这样，用户体验向下兼容
-                            e.preventDefault();
-                            if (touchOneDist + touchStartOffsetBottom > 0) {
-                                that.style = `transform:translate3d(0,0,0)`;
+                        if (touchOneDist < 0) {
+                            // 手指向上滑动
+
+                            // 点击时候相对底部的位置
+                            let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this.clientHeight;
+
+                            if (that.compatibleMode) {
+                                // 安卓低端版本微信端才需要这样，用户体验向下兼容
+                                e.preventDefault();
+                                if (touchOneDist + touchStartOffsetBottom > 0) {
+                                    setTransform(0, 0, 0);
+
+                                    // that.style = `transform:translate3d(0,0,0)`;
+                                } else {
+                                    setTransform(0, touchOneDist + touchStartOffsetBottom, 0);
+                                    // that.style =
+                                    //     `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+                                }
                             } else {
-                                that.style =
-                                    `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+
+                                if (touchOneDist + touchStartOffsetBottom > 0) {
+                                    // that.style = `transform:translate3d(0,0,0)`;
+                                    setTransform(0, 0, 0);
+                                } else {
+                                    setTransform(0, touchOneDist + touchStartOffsetBottom, 0);
+                                    // that.style =
+                                    //     `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+                                }
                             }
+
                         } else {
-                            console.log(touchOneDist, touchStartOffsetBottom)
+                            // 手指向下滑动
 
-                            if (touchOneDist + touchStartOffsetBottom > 0) {
-                                that.style = `transform:translate3d(0,0,0)`;
-                            } else {
-                                that.style =
-                                    `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
-                            }
+                            // 体验优化，处理快速向下滑动时候
+                            setTransform(0, 0, 0);
                         }
 
                     } else {
-                        if (that.overflowHidden && touchOneDist < 0) {
-                            that.overflowHidden = false;
-                            that.style = `transform:translate3d(0,0,0)`;
-                        }
+                        // 貌似可以不用
+                        // if (that.overflowHidden) {
+                        //     that.overflowHidden = false;
+                        //     // that.style = `transform:translate3d(0,0,0)`;
+                        //     setTransform(0, 0, 0);
+                        // }
                     }
+
 
                     // 兼容IOS和PC，安卓微信内置浏览器不可使用（未详细测试）
                     e.stopPropagation();
@@ -258,7 +321,8 @@
                 this.$el.addEventListener("touchend", function (e) {
                     if (e.touches && e.touches.length == 0) {
                         // 松开手指参数复位
-                        that.style = `transform:translate3d(0,0,0)`;
+                        // that.style = `transform:translate3d(0,0,0)`;
+                        setTransform(0, 0, 0);
                         that.overflowHidden = false;
                         that.touches = [];
 
@@ -284,16 +348,6 @@
                     e.stopPropagation();
                 });
 
-                // document.body.addEventListener("touchmove1", function (e) {
-                //     //In this case, the default behavior is scrolling the body, which
-                //     //would result in an overflow.  Since we don't want that, we preventDefault.
-                //     if (e._isScroller) {
-                //         e.preventDefault();
-                //     }
-                //     // that.tips = evt._isScroller;
-
-                //     // e.stopPropagation();
-                // });
 
                 // 监听滚动到顶端
                 this.$el.addEventListener("scroll", function (e) {
@@ -334,8 +388,6 @@
                     this.$el.scrollTop = 1;
                 }, 1);
 
-                console.log(this);
-
                 let that = this;
 
                 let scrollTimer;
@@ -351,7 +403,8 @@
 
                     // 到达顶部，兼容IOS的顶端滚动bug
                     if (this.scrollTop == 0) {
-                        console.log("到达顶部");
+                        // console.log("到达顶部");
+                        that.onReachTop();
                         clearTimeout(scrollTimer);
                         scrollTimer = setTimeout(() => {
                             this.scrollTop = 1;
@@ -371,7 +424,7 @@
                 });
             },
             // 根据key值进行定位
-            resetScroll(scrollerKey) {
+            resetScrollOffset(scrollerKey) {
                 let PageScroller = window.PageScroller;
                 let scrollerObj = PageScroller[scrollerKey];
                 if (scrollerObj) {
@@ -450,7 +503,7 @@
         },
         watch: {
             $route(to, from) {
-                this.resetScroll(this.scrollerKey);
+                this.resetScrollOffset(this.scrollerKey);
             }
         },
         inheritAttrs: true
