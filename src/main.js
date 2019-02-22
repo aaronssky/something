@@ -5,10 +5,19 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
+import axios from "axios";
+import Mock from "mockjs";
 import packages from "./packages";
 import "./registerServiceWorker";
 
-window.mobileUtil.fixScreen();
+global.axios = axios;
+
+Mock.mock('/user/userInfo', 'get', {
+    a: 23
+});
+
+
+global.mobileUtil.fixScreen();
 Vue.config.productionTip = false;
 
 let AppVueData = {

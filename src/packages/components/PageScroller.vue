@@ -164,9 +164,6 @@
                         $parents.addClass("overflow-hidden-temp");
                     }
 
-
-                    // console.log(touchOneY);
-                    // e.preventDefault();
                     e.stopPropagation();
                 });
 
@@ -176,27 +173,16 @@
                         // 增加暂时禁止滚动的元素，用来处理滚动父子级穿透
                         let $curScrollEl = $(that.$el);
                         let $parents = $curScrollEl.parents() || [];
+                        // $curScrollEl.find(".page-scroller").addClass("overflow-hidden-temp");
+                        
                         // $parents.addClass("overflow-hidden-temp");
                     }
-                    // setTimeout(() => {
-                    //     $parents.removeClass("overflow-hidden-temp");
-                    // },100)
 
                     let touches = e.touches || [],
                         touchOne = touches[0],
                         touchOneX = touchOne.pageX,
                         touchOneY = touchOne.pageY,
                         touchOneDist = touchOneY - touchStartY;
-
-                    // if (that.isAtScrollTop) {
-
-                    //     e._isScroller = true;
-                    // }
-
-                    // if (touchOneDist < 0) {
-
-                    //     e._isScroller = false;
-                    // }
 
                     if (touchOneDist > 0 && that.isAtScrollTop) {
 
@@ -215,7 +201,7 @@
                                         `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
                                 }
                             }
-                            
+
                         } else {
                             if (touchOneDist - touchStartScrollTop < 0) {
                                 that.style = `transform:translate3d(0,0,0)`;
@@ -351,6 +337,8 @@
                 console.log(this);
 
                 let that = this;
+
+                let scrollTimer;
                 this.$el.addEventListener("scroll", function (e) {
                     // console.log(this.scrollTop)
                     let PageScroller = window.PageScroller;
@@ -362,15 +350,21 @@
                     window.PageScroller[scrollerKey] = scrollerObj;
 
                     // 到达顶部，兼容IOS的顶端滚动bug
-                    if (this.scrollTop <= 0) {
+                    if (this.scrollTop == 0) {
                         console.log("到达顶部");
-                        this.scrollTop = 1;
+                        clearTimeout(scrollTimer);
+                        scrollTimer = setTimeout(() => {
+                            this.scrollTop = 1;
+                        }, 0);
                     }
 
                     // 到达底部，兼容IOS的顶端滚动bug
                     if (this.scrollHeight <= this.clientHeight + this.scrollTop) {
                         console.log("到达底部");
-                        this.scrollTop = this.scrollHeight - this.clientHeight - 1;
+                        clearTimeout(scrollTimer);
+                        scrollTimer = setTimeout(() => {
+                            this.scrollTop = this.scrollHeight - this.clientHeight - 1;
+                        }, 0);
                     }
 
                     e.stopPropagation();
