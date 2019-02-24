@@ -2,17 +2,19 @@
     <div class="page-scroller" :class="{'page-scroller-overflow-hidden':overflowHidden}" :id="id || `PageScroller-${scrollerKey}`"
         :data-key="scrollerKey">
         <div class="page-scroller-top-placeholder">
-            <div class="page-scroller-top-placeholder-contain">
+            <div class="page-scroller-top-placeholder-container">
                 {{style}}
+                <br>
+                {{tips}}
                 <h1>下拉刷新</h1>
             </div>
         </div>
-        <div class="page-scroller-contain" :class="{'page-scroller-transition':touches.length==0}" :style="style">
+        <div class="page-scroller-container" :class="{'page-scroller-transition':touches.length==0}" :style="style">
             <div style="    word-wrap: break-word;" v-html="browser"></div>
             <slot></slot>
         </div>
         <div class="page-scroller-bottom-placeholder">
-            <div class="page-scroller-bottom-placeholder-contain">
+            <div class="page-scroller-bottom-placeholder-container">
                 {{style}}
                 <h1>上拉加载</h1>
             </div>
@@ -37,6 +39,8 @@
                 isIos: false,
                 isWX: false,
                 compatibleMode: false, // 低端机型用户体验向下兼容模式
+
+                tips: ""
             };
         },
         props: {
@@ -77,7 +81,9 @@
 
             this.addScrollEvent();
 
+
             this.addTouchEvent();
+
         },
         methods: {
             init() {
@@ -140,26 +146,46 @@
                 this.compatibleMode = this.x5Browser;
             },
             addTouchEvent() {
+
+                // 若当前scroller没滚动条，则不绑定相关事件
+                if (this.$el.offsetHeight >= this.$el.scrollHeight) {
+                    return;
+                }
                 let that = this;
 
                 let touchStartY, touchStartScrollTop;
 
                 let setTransform = (x = 0, y = 0, z = 0) => {
 
-                    let limit = 150;
+                    let topTriggerHeight = 150; // 顶部下拉触发事件高度
+
+                    let maxScrollHeight = 0; // 上下拉滚动距离最大阈值
+
+                    let topMaxScrollHeight = 300 || maxScrollHeight;
+
+                    let bottomMaxScrollHeight = 0 || maxScrollHeight;
 
                     y = y / 2; // 滑动比例
 
-                    if (y >= limit) {
-                        // 顶端下拉到达阀值
-                        y = limit;
-                    } else if (y <= -limit) {
-                        // 低端上拉到达阀值
-                        y = -limit;
+                    // 顶部下拉设置最大高度阈值
+                    if (topMaxScrollHeight > 0) {
+                        if (y >= topMaxScrollHeight) {
+                            // 顶端下拉到达阈值
+                            y = topMaxScrollHeight;
+                        }
                     }
 
-                    console.warn(y/limit)
-                    
+                    // 底部上拉设置最大高度阈值
+                    if (bottomMaxScrollHeight > 0) {
+                        if (y <= -bottomMaxScrollHeight) {
+                            // 低端上拉到达阈值
+                            y = -bottomMaxScrollHeight;
+                        }
+                    }
+
+                    that.tips = y / topTriggerHeight;
+                    // console.warn(y / limit)
+
                     this.style = `transform:translate3d(${x},${y}px,${z})`;
                 }
 
@@ -388,6 +414,7 @@
                     this.$el.scrollTop = 1;
                 }, 1);
 
+
                 let that = this;
 
                 let scrollTimer;
@@ -529,7 +556,7 @@
             // overflow: hidden;
             position: relative;
 
-            .page-scroller-top-placeholder-contain {
+            .page-scroller-top-placeholder-container {
                 background: inherit;
                 position: absolute;
                 width: 100%;
@@ -545,7 +572,7 @@
             position: absolute;
             transform: translateY(-100%);
 
-            .page-scroller-bottom-placeholder-contain {
+            .page-scroller-bottom-placeholder-container {
                 background: inherit;
                 position: relative;
                 width: 100%;
@@ -553,7 +580,7 @@
             }
         }
 
-        .page-scroller-contain {
+        .page-scroller-container {
             position: relative;
             z-index: 1;
             background: inherit;
