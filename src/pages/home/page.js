@@ -19,6 +19,12 @@ export default {
         onReachTop() {
             ++this.i;
             console.log("home 到达顶部");
+        },
+        onTriggerTop(fn_loadFinished) {
+            console.log("页面reload,顶部刷新");
+            setTimeout(() => {
+                fn_loadFinished();
+            }, 1000)
         }
     },
     components: {

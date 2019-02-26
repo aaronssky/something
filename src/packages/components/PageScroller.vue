@@ -1,17 +1,39 @@
 <template>
     <div class="page-scroller" :class="{'page-scroller-overflow-hidden':overflowHidden}" :id="id || `PageScroller-${scrollerKey}`"
         :data-key="scrollerKey">
-        <div class="page-scroller-top-placeholder">
+        <div class="page-scroller-top-placeholder" v-if="scrollMode=='absolute'">
             <div class="page-scroller-top-placeholder-container">
-                {{style}}
-                <br>
-                {{tips}}
-                <h1>下拉刷新</h1>
+                <slot name="scroll-top-container" :scrollerStatus="scrollerStatus">
+                    {{style}}
+                    <br>
+                    {{tips}}
+                    <h1>下拉刷新</h1>
+                </slot>
             </div>
         </div>
         <div class="page-scroller-container" :class="{'page-scroller-transition':touches.length==0}" :style="style">
-            <div style="    word-wrap: break-word;" v-html="browser"></div>
+
+            <div class="page-scroller-inner-top" v-if="scrollMode=='relative'">
+                <slot name="scroll-top-container" :scroller-status="scrollerStatus">
+                    <div v-show="scrollerStatus.triggerTopLoading">加载中...</div>
+                    <div v-show="!scrollerStatus.triggerTopLoading">
+                        <div class="" v-show="scrollerStatus.topTriggerPercent < 100">下拉更新def</div>
+                        <div class="" v-show="scrollerStatus.topTriggerPercent >= 100">松开更新def</div>
+                    </div>
+
+                </slot>
+            </div>
+
+            <div style="    word-wrap: break-word;" v-html="browser">
+            </div>
+            <div style="height:100px;  word-wrap: break-word;" v-html="scrollerStatus"></div>
             <slot></slot>
+            <div class="page-scroller-inner-bottom-placeholder">
+                <div class="page-scroller-inner-bottom-container">
+                    底部
+                    <div style="    word-wrap: break-word;" v-html="browser"></div>
+                </div>
+            </div>
         </div>
         <div class="page-scroller-bottom-placeholder">
             <div class="page-scroller-bottom-placeholder-container">
@@ -38,8 +60,12 @@
                 isAndroid: false,
                 isIos: false,
                 isWX: false,
+                isTrueIos: undefined, // 是否IOS真机，区分chrome等模拟器
                 compatibleMode: false, // 低端机型用户体验向下兼容模式
-
+                scrollerStatus: {
+                    triggerTopLoading: false, // 顶部是否处于loading中
+                    topTriggerPercent: 0 // 顶部滚动到达触发事件的百分比
+                },
                 tips: ""
             };
         },
@@ -59,6 +85,19 @@
                 default: function () {
                     console.log("default onReachTop")
                 }
+            },
+            onTriggerTop: {
+                type: Function,
+                default: function () {
+                    console.log("default onTriggerTop")
+                }
+            },
+
+            // 顶端滚动时候背景的位置
+            // relative:跟随滚动， absolute:固定在顶部，底部
+            scrollMode: {
+                type: String,
+                default: "relative",
             }
         },
         mounted() {
@@ -87,32 +126,33 @@
         },
         methods: {
             init() {
-                function isWX() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    return /micromessenger/.test(ua) ? true : false;
-                }
 
-                function isIos() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    if (/iphone|ipad|ipod/.test(ua)) {
-                        return true;
-                    } else if (/android/.test(ua)) {
-                        return false
-                    }
-                }
+                // function isWX() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     return /micromessenger/.test(ua) ? true : false;
+                // }
 
-                function isAndroid() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    if (/android/.test(ua)) {
-                        return true;
-                    }
-                    return false;
-                }
+                // function isIos() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     if (/iphone|ipad|ipod/.test(ua)) {
+                //         return true;
+                //     } else if (/android/.test(ua)) {
+                //         return false
+                //     }
+                // }
 
-                function isQQBrowser() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    return /qqbrowser/.test(ua) ? true : false;
-                }
+                // function isAndroid() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     if (/android/.test(ua)) {
+                //         return true;
+                //     }
+                //     return false;
+                // }
+
+                // function isQQBrowser() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     return /qqbrowser/.test(ua) ? true : false;
+                // }
 
                 let browser = {
                     feature: function () {
@@ -131,14 +171,27 @@
                             wx: u.indexOf('MicroMessenger') > -1, // 微信内置浏览器
                             qq: u.indexOf('QBWebView') > -1, // QQ内置浏览器（暂未严谨测试）
                             x5Browser: u.indexOf('MQQBrowser') > -1, // 腾讯X5内核浏览器
+                            trueIos: (function () {
+                                // 在ios safir、UIWebView 、WKWebView里是有兼容问题的
+                                // 但在chrome（PC版和移动端版），android webview及andrid上各国产浏览器是正常的。
+                                // 故可用来区分IOS真机与chrome模拟器
+                                if (new Date('2016-11-11 11:11:11').getTime() > 0) {
+                                    return false;
+                                } else {
+                                    // NaN
+                                    return true;
+                                }
+                            })()
                         };
                     }()
                 };
+
 
                 this.browser = JSON.stringify(browser) + " <br> <br> " + navigator.userAgent;
 
                 this.isWX = browser.feature.wx;
                 this.isIos = browser.feature.ios;
+                this.isTrueIos = browser.feature.trueIos;
                 this.isAndroid = browser.feature.android;
                 this.x5Browser = browser.feature.x5Browser;
 
@@ -147,7 +200,7 @@
             },
             addTouchEvent() {
 
-                // 若当前scroller没滚动条，则不绑定相关事件
+                // 若当前scroller没滚动条（容器不够高度，无滚动条），则不绑定相关事件
                 if (this.$el.offsetHeight >= this.$el.scrollHeight) {
                     return;
                 }
@@ -155,7 +208,35 @@
 
                 let touchStartY, touchStartScrollTop;
 
+                that._onTriggerTop = () => {
+                    this.scrollerStatus.triggerTopLoading = true;
+
+                    let timer;
+                    let fn_loadFinisthed = () => {
+                        clearTimeout(timer);
+                        console.log("顶部刷新完成");
+                        this.scrollerStatus.triggerTopLoading = false;
+                        setTransform(0, 0, 0);
+                    };
+
+                    // 超时机制
+                    let fn_loadTimeout = () => {
+                        timer = setTimeout(() => {
+                        console.log("timeout");
+                            fn_loadFinisthed();
+                        }, 5000);
+                    }
+
+                    this.onTriggerTop(fn_loadFinisthed);
+                    
+                    fn_loadTimeout();
+                }
+
                 let setTransform = (x = 0, y = 0, z = 0) => {
+
+                    if (that.scrollerStatus.triggerTopLoading) {
+                        y = 100;
+                    }
 
                     let topTriggerHeight = 150; // 顶部下拉触发事件高度
 
@@ -184,6 +265,10 @@
                     }
 
                     that.tips = y / topTriggerHeight;
+                    this.scrollerStatus.topTriggerPercent = y / topTriggerHeight * 100;
+                    if (this.scrollerStatus.topTriggerPercent > 100) {
+                        this.scrollerStatus.topTriggerPercent = 100;
+                    }
                     // console.warn(y / limit)
 
                     this.style = `transform:translate3d(${x},${y}px,${z})`;
@@ -218,13 +303,14 @@
 
                 this.$el.addEventListener("touchmove", function (e) {
 
-                    if (that.isIos) {
+                    // PC端模拟器下兼容滚动穿透
+                    if (that.isIos && !that.isTrueIos) {
                         // 增加暂时禁止滚动的元素，用来处理滚动父子级穿透
                         let $curScrollEl = $(that.$el);
-                        let $parents = $curScrollEl.parents(".page-scroller") || [];
-                        // $curScrollEl.find(".page-scroller").addClass("overflow-hidden-temp");
+                        // let $parents = $curScrollEl.parents(".page-scroller") || [];
+                        let $parents = $curScrollEl.parents() || [];
 
-                        // $parents.addClass("overflow-hidden-temp");
+                        $parents.addClass("overflow-hidden-temp");
                     }
 
                     let touches = e.touches || [],
@@ -345,10 +431,20 @@
                 });
 
                 this.$el.addEventListener("touchend", function (e) {
+
+                    if (e.touches && e.touches.length == 0 && that.scrollerStatus && that.scrollerStatus.topTriggerPercent >=
+                        100) {
+                        typeof that._onTriggerTop === "function" && that._onTriggerTop();
+                    }
+
                     if (e.touches && e.touches.length == 0) {
                         // 松开手指参数复位
                         // that.style = `transform:translate3d(0,0,0)`;
+                        // if (that.scrollerStatus.triggerTopLoading) {
+                        // setTransform(0, 100, 0);
+                        // } else {
                         setTransform(0, 0, 0);
+                        // }
                         that.overflowHidden = false;
                         that.touches = [];
 
@@ -588,6 +684,28 @@
 
             &.page-scroller-transition {
                 transition: all 0.3s;
+            }
+
+            .page-scroller-inner-top {
+                position: absolute;
+                display: inline-block;
+                width: 100%;
+                transform: translate3d(0, -100%, 0);
+                top: 0;
+                left: 0;
+            }
+
+            .page-scroller-inner-bottom-placeholder {
+                position: fixed;
+                display: inline-block;
+                width: 100%;
+                bottom: 0;
+                left: 0;
+                height: 0;
+
+                .page-scroller-inner-bottom-container {
+                    position: relative;
+                }
             }
         }
     }
