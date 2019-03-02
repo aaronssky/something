@@ -1,9 +1,11 @@
 <template>
     <div class="page-home">
         <PageScroller b="23" :on-reach-top="onReachTop" scroll-mode="relative" :on-trigger-top="onTriggerTop">
-            <template slot="scroll-top-container1" slot-scope="sData">
-                <div class="" v-show="sData.scrollerStatus.topTriggerPercent < 100">hoome下拉更新</div>
-                <div class="" v-show="sData.scrollerStatus.topTriggerPercent >= 100">home松开更新</div>
+            <template slot="scroll-top-container" slot-scope="sData">
+                <div class="trigger-top-area">
+                    <div class="" v-show="sData.scrollerStatus.topTriggerPercent < 100">hoome下拉更新</div>
+                    <div class="" v-show="sData.scrollerStatus.topTriggerPercent >= 100">home松开更新</div>
+                </div>
             </template>
             <!-- <img alt="Vue logo" src="@/assets/logo.png"> -->
             <div>{{a}}</div>

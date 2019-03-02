@@ -21,8 +21,9 @@ export default {
             console.log("home 到达顶部");
         },
         onTriggerTop(fn_loadFinished) {
-            console.log("页面reload,顶部刷新");
+            console.log("home 页面 TriggerTop 触发");
             setTimeout(() => {
+                console.log("home 页面 TriggerTop load finished");
                 fn_loadFinished();
             }, 1000)
         }

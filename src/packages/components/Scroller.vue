@@ -1,18 +1,42 @@
 <template>
     <div class="page-scroller" :class="{'page-scroller-overflow-hidden':overflowHidden}" :id="id || `PageScroller-${scrollerKey}`"
         :data-key="scrollerKey">
-        <div class="page-scroller-top-placeholder">
-            <div class="page-scroller-top-placeholder-contain">
-                {{style}}
-                <h1>下拉刷新</h1>
+        <div class="page-scroller-top-placeholder" v-if="scrollMode=='absolute'">
+            <div class="page-scroller-top-placeholder-container">
+                <slot name="scroll-top-container" :scrollerStatus="scrollerStatus">
+                    {{style}}
+                    <br>
+                    {{tips}}
+                    <h1>下拉刷新</h1>
+                </slot>
             </div>
         </div>
-        <div class="page-scroller-contain" :class="{'page-scroller-transition':touches.length==0}" :style="style">
-            <div style="    word-wrap: break-word;">{{browser}}</div>
+        <div class="page-scroller-container" :class="{'page-scroller-transition':touches.length==0}" :style="style">
+
+            <div class="page-scroller-inner-top" v-if="scrollMode=='relative'">
+                <slot name="scroll-top-container" :scroller-status="scrollerStatus">
+                    <div v-show="scrollerStatus.triggerTopLoading">加载中...</div>
+                    <div v-show="!scrollerStatus.triggerTopLoading">
+                        <div class="" v-show="scrollerStatus.topTriggerPercent < 100">下拉更新def</div>
+                        <div class="" v-show="scrollerStatus.topTriggerPercent >= 100">松开更新def</div>
+                    </div>
+
+                </slot>
+            </div>
+
+            <div style="    word-wrap: break-word;" v-html="browser">
+            </div>
+            <div style="height:100px;  word-wrap: break-word;" v-html="scrollerStatus"></div>
             <slot></slot>
+            <div class="page-scroller-inner-bottom-placeholder">
+                <div class="page-scroller-inner-bottom-container">
+                    底部
+                    <div style="    word-wrap: break-word;" v-html="browser"></div>
+                </div>
+            </div>
         </div>
         <div class="page-scroller-bottom-placeholder">
-            <div class="page-scroller-bottom-placeholder-contain">
+            <div class="page-scroller-bottom-placeholder-container">
                 {{style}}
                 <h1>上拉加载</h1>
             </div>
@@ -36,7 +60,13 @@
                 isAndroid: false,
                 isIos: false,
                 isWX: false,
+                isTrueIos: undefined, // 是否IOS真机，区分chrome等模拟器
                 compatibleMode: false, // 低端机型用户体验向下兼容模式
+                scrollerStatus: {
+                    triggerTopLoading: false, // 顶部是否处于loading中
+                    topTriggerPercent: 0 // 顶部滚动到达触发事件的百分比
+                },
+                tips: ""
             };
         },
         props: {
@@ -49,6 +79,25 @@
             id: {
                 type: String,
                 default: ""
+            },
+            onReachTop: {
+                type: Function,
+                default: function () {
+                    console.log("default onReachTop")
+                }
+            },
+            onTriggerTop: {
+                type: Function,
+                default: function () {
+                    console.log("default onTriggerTop")
+                }
+            },
+
+            // 顶端滚动时候背景的位置
+            // relative:跟随滚动， absolute:固定在顶部，底部
+            scrollMode: {
+                type: String,
+                default: "relative",
             }
         },
         mounted() {
@@ -71,38 +120,39 @@
 
             this.addScrollEvent();
 
+
             this.addTouchEvent();
+
         },
         methods: {
             init() {
-                function isWX() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    return /micromessenger/.test(ua) ? true : false;
-                }
 
-                function isIos() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    if (/iphone|ipad|ipod/.test(ua)) {
-                        return true;
-                    } else if (/android/.test(ua)) {
-                        return false
-                    }
-                }
+                // function isWX() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     return /micromessenger/.test(ua) ? true : false;
+                // }
 
-                function isAndroid() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    if (/android/.test(ua)) {
-                        return true;
-                    }
-                    return false;
-                }
+                // function isIos() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     if (/iphone|ipad|ipod/.test(ua)) {
+                //         return true;
+                //     } else if (/android/.test(ua)) {
+                //         return false
+                //     }
+                // }
 
-                function isQQBrowser() {
-                    var ua = navigator.userAgent.toLowerCase();
-                    return /qqbrowser/.test(ua) ? true : false;
-                }
+                // function isAndroid() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     if (/android/.test(ua)) {
+                //         return true;
+                //     }
+                //     return false;
+                // }
 
-
+                // function isQQBrowser() {
+                //     var ua = navigator.userAgent.toLowerCase();
+                //     return /qqbrowser/.test(ua) ? true : false;
+                // }
 
                 let browser = {
                     feature: function () {
@@ -119,28 +169,112 @@
                             iPad: u.indexOf('iPad') > -1, //iPad
                             webApp: u.indexOf('Safari') > -1, //【待定】是否第三方浏览器Safari（QQ，微信内置浏览器没该属性）
                             wx: u.indexOf('MicroMessenger') > -1, // 微信内置浏览器
-                            qq: u.indexOf('QBWebView') > -1, // QQ内置浏览器
-                            qqBrowser: u.indexOf('MQQBrowser') > -1, // QQ浏览器（非QQ内置浏览器）
+                            qq: u.indexOf('QBWebView') > -1, // QQ内置浏览器（暂未严谨测试）
+                            x5Browser: u.indexOf('MQQBrowser') > -1, // 腾讯X5内核浏览器
+                            trueIos: (function () {
+                                // 在ios safir、UIWebView 、WKWebView里是有兼容问题的
+                                // 但在chrome（PC版和移动端版），android webview及andrid上各国产浏览器是正常的。
+                                // 故可用来区分IOS真机与chrome模拟器
+                                if (new Date('2016-11-11 11:11:11').getTime() > 0) {
+                                    return false;
+                                } else {
+                                    // NaN
+                                    return true;
+                                }
+                            })()
                         };
                     }()
                 };
 
-                this.browser = JSON.stringify(browser) + " ================= " + navigator.userAgent;
+
+                this.browser = JSON.stringify(browser) + " <br> <br> " + navigator.userAgent;
 
                 this.isWX = browser.feature.wx;
                 this.isIos = browser.feature.ios;
+                this.isTrueIos = browser.feature.trueIos;
                 this.isAndroid = browser.feature.android;
-                this.isQQBrowser = browser.feature.qqBrowser;
+                this.x5Browser = browser.feature.x5Browser;
 
                 // 安卓低版本向下兼容，需要加安卓系统版本判断
-                this.compatibleMode = (this.isWX || this.isQQBrowser) && this.isAndroid;
+                this.compatibleMode = this.x5Browser;
             },
             addTouchEvent() {
+
+                // 若当前scroller没滚动条（容器不够高度，无滚动条），则不绑定相关事件
+                if (this.$el.offsetHeight >= this.$el.scrollHeight) {
+                    return;
+                }
                 let that = this;
 
                 let touchStartY, touchStartScrollTop;
 
-                this.style = `transform:translate3d(0,0,0)`;
+                that._onTriggerTop = () => {
+                    this.scrollerStatus.triggerTopLoading = true;
+
+                    let timer;
+                    let fn_loadFinisthed = () => {
+                        clearTimeout(timer);
+                        // console.log("顶部刷新完成");
+                        this.scrollerStatus.triggerTopLoading = false;
+                        setTransform(0, 0, 0);
+                    };
+
+                    // 超时机制
+                    let fn_loadTimeout = () => {
+                        timer = setTimeout(() => {
+                            console.warn("default warning: trigger top timeout");
+                            fn_loadFinisthed();
+                        }, 5000);
+                    }
+
+                    this.onTriggerTop(fn_loadFinisthed);
+
+                    fn_loadTimeout();
+                }
+
+                let setTransform = (x = 0, y = 0, z = 0) => {
+
+                    if (that.scrollerStatus.triggerTopLoading) {
+                        y = 100;
+                    }
+
+                    let topTriggerHeight = 150; // 顶部下拉触发事件高度
+
+                    let maxScrollHeight = 0; // 上下拉滚动距离最大阈值
+
+                    let topMaxScrollHeight = 300 || maxScrollHeight;
+
+                    let bottomMaxScrollHeight = 0 || maxScrollHeight;
+
+                    y = y / 2; // 滑动比例
+
+                    // 顶部下拉设置最大高度阈值
+                    if (topMaxScrollHeight > 0) {
+                        if (y >= topMaxScrollHeight) {
+                            // 顶端下拉到达阈值
+                            y = topMaxScrollHeight;
+                        }
+                    }
+
+                    // 底部上拉设置最大高度阈值
+                    if (bottomMaxScrollHeight > 0) {
+                        if (y <= -bottomMaxScrollHeight) {
+                            // 低端上拉到达阈值
+                            y = -bottomMaxScrollHeight;
+                        }
+                    }
+
+                    that.tips = y / topTriggerHeight;
+                    this.scrollerStatus.topTriggerPercent = y / topTriggerHeight * 100;
+                    if (this.scrollerStatus.topTriggerPercent > 100) {
+                        this.scrollerStatus.topTriggerPercent = 100;
+                    }
+                    // console.warn(y / limit)
+
+                    this.style = `transform:translate3d(${x},${y}px,${z})`;
+                }
+
+                setTransform(0, 0, 0);
 
                 this.$el.addEventListener("touchstart", function (e) {
                     let touches = e.touches || [],
@@ -164,23 +298,20 @@
                         $parents.addClass("overflow-hidden-temp");
                     }
 
-
-                    // console.log(touchOneY);
-                    // e.preventDefault();
                     e.stopPropagation();
                 });
 
                 this.$el.addEventListener("touchmove", function (e) {
 
-                    if (that.isIos) {
+                    // PC端模拟器下兼容滚动穿透
+                    if (that.isIos && !that.isTrueIos) {
                         // 增加暂时禁止滚动的元素，用来处理滚动父子级穿透
                         let $curScrollEl = $(that.$el);
+                        // let $parents = $curScrollEl.parents(".page-scroller") || [];
                         let $parents = $curScrollEl.parents() || [];
-                        // $parents.addClass("overflow-hidden-temp");
+
+                        $parents.addClass("overflow-hidden-temp");
                     }
-                    // setTimeout(() => {
-                    //     $parents.removeClass("overflow-hidden-temp");
-                    // },100)
 
                     let touches = e.touches || [],
                         touchOne = touches[0],
@@ -188,91 +319,132 @@
                         touchOneY = touchOne.pageY,
                         touchOneDist = touchOneY - touchStartY;
 
-                    // if (that.isAtScrollTop) {
+                    if (that.isAtScrollTop) {
+                        // 当前点击状态是在顶端时候
 
-                    //     e._isScroller = true;
-                    // }
+                        if (touchOneDist > 0) {
+                            // 手指向下滑动时候
 
-                    // if (touchOneDist < 0) {
+                            if (that.compatibleMode) {
+                                // 安卓低端版本微信端或QQ浏览器交互处理，用户体验向下兼容
 
-                    //     e._isScroller = false;
-                    // }
+                                // 用以禁止顶端下拉时候会把页面也拉下，故牺牲用户体验，向下兼容
+                                e.preventDefault();
 
-                    if (touchOneDist > 0 && that.isAtScrollTop) {
+                                // 当本来已经处于顶端时候才允许触发下拉
+                                if (that.touchStartIsAtScrollTop) {
+                                    if (touchOneDist - touchStartScrollTop < 0) {
+                                        setTransform(0, 0, 0);
 
-                        if (that.compatibleMode) {
-                            // 安卓低端版本微信端或QQ浏览器交互处理，用户体验向下兼容
+                                        // that.style = `transform:translate3d(0,0,0)`;
+                                    } else {
+                                        setTransform(0, touchOneDist - touchStartScrollTop, 0);
 
-                            // 用以禁止顶端下拉时候会把页面也拉下，故牺牲用户体验，向下兼容
-                            e.preventDefault();
+                                        // that.style = `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
+                                    }
+                                }
 
-                            // 当本来已经处于顶端时候才允许触发下拉
-                            if (that.touchStartIsAtScrollTop) {
+                            } else {
                                 if (touchOneDist - touchStartScrollTop < 0) {
-                                    that.style = `transform:translate3d(0,0,0)`;
+                                    // that.style = `transform:translate3d(0,0,0)`;
+                                    setTransform(0, 0, 0);
+
                                 } else {
-                                    that.style =
-                                        `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
+                                    setTransform(0, touchOneDist - touchStartScrollTop, 0);
+                                    // that.style =
+                                    //     `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
                                 }
                             }
 
                         } else {
-                            if (touchOneDist - touchStartScrollTop < 0) {
-                                that.style = `transform:translate3d(0,0,0)`;
-                            } else {
-                                that.style =
-                                    `transform:translate3d(0,${touchOneDist - touchStartScrollTop}px,0)`;
-                            }
+                            // 手指向上滑动时候
+
+                            // 体验兼容模式使用
+                            that.touchStartIsAtScrollTop = false;
+
+                            // 体验优化，处理快速向上滑动时候
+                            setTransform(0, 0, 0);
                         }
 
                     } else {
-                        that.touchStartIsAtScrollTop = false;
-                        if (that.overflowHidden && touchOneDist > 0) {
+
+                        // 貌似可以不用
+                        if (that.overflowHidden) {
                             that.overflowHidden = false;
-                            that.style = `transform:translate3d(0,0,0)`;
+                            // that.style = `transform:translate3d(0,0,0)`;
+                            setTransform(0, 0, 0);
                         }
                     }
 
 
-                    if (touchOneDist < 0 && that.isAtScrollBottom) {
-                        // 点击时候相对底部的位置
-                        let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this.clientHeight;
+                    if (that.isAtScrollBottom) {
 
-                        if (that.compatibleMode) {
-                            // 安卓低端版本微信端才需要这样，用户体验向下兼容
-                            e.preventDefault();
-                            if (touchOneDist + touchStartOffsetBottom > 0) {
-                                that.style = `transform:translate3d(0,0,0)`;
+                        if (touchOneDist < 0) {
+                            // 手指向上滑动
+
+                            // 点击时候相对底部的位置
+                            let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this.clientHeight;
+
+                            if (that.compatibleMode) {
+                                // 安卓低端版本微信端才需要这样，用户体验向下兼容
+                                e.preventDefault();
+                                if (touchOneDist + touchStartOffsetBottom > 0) {
+                                    setTransform(0, 0, 0);
+
+                                    // that.style = `transform:translate3d(0,0,0)`;
+                                } else {
+                                    setTransform(0, touchOneDist + touchStartOffsetBottom, 0);
+                                    // that.style =
+                                    //     `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+                                }
                             } else {
-                                that.style =
-                                    `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+
+                                if (touchOneDist + touchStartOffsetBottom > 0) {
+                                    // that.style = `transform:translate3d(0,0,0)`;
+                                    setTransform(0, 0, 0);
+                                } else {
+                                    setTransform(0, touchOneDist + touchStartOffsetBottom, 0);
+                                    // that.style =
+                                    //     `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
+                                }
                             }
+
                         } else {
-                            console.log(touchOneDist, touchStartOffsetBottom)
+                            // 手指向下滑动
 
-                            if (touchOneDist + touchStartOffsetBottom > 0) {
-                                that.style = `transform:translate3d(0,0,0)`;
-                            } else {
-                                that.style =
-                                    `transform:translate3d(0,${touchOneDist+touchStartOffsetBottom}px,0)`;
-                            }
+                            // 体验优化，处理快速向下滑动时候
+                            setTransform(0, 0, 0);
                         }
 
                     } else {
-                        if (that.overflowHidden && touchOneDist < 0) {
-                            that.overflowHidden = false;
-                            that.style = `transform:translate3d(0,0,0)`;
-                        }
+                        // 貌似可以不用
+                        // if (that.overflowHidden) {
+                        //     that.overflowHidden = false;
+                        //     // that.style = `transform:translate3d(0,0,0)`;
+                        //     setTransform(0, 0, 0);
+                        // }
                     }
+
 
                     // 兼容IOS和PC，安卓微信内置浏览器不可使用（未详细测试）
                     e.stopPropagation();
                 });
 
                 this.$el.addEventListener("touchend", function (e) {
+
+                    if (e.touches && e.touches.length == 0 && that.scrollerStatus && that.scrollerStatus.topTriggerPercent >=
+                        100) {
+                        typeof that._onTriggerTop === "function" && that._onTriggerTop();
+                    }
+
                     if (e.touches && e.touches.length == 0) {
                         // 松开手指参数复位
-                        that.style = `transform:translate3d(0,0,0)`;
+                        // that.style = `transform:translate3d(0,0,0)`;
+                        // if (that.scrollerStatus.triggerTopLoading) {
+                        // setTransform(0, 100, 0);
+                        // } else {
+                        setTransform(0, 0, 0);
+                        // }
                         that.overflowHidden = false;
                         that.touches = [];
 
@@ -298,16 +470,6 @@
                     e.stopPropagation();
                 });
 
-                // document.body.addEventListener("touchmove1", function (e) {
-                //     //In this case, the default behavior is scrolling the body, which
-                //     //would result in an overflow.  Since we don't want that, we preventDefault.
-                //     if (e._isScroller) {
-                //         e.preventDefault();
-                //     }
-                //     // that.tips = evt._isScroller;
-
-                //     // e.stopPropagation();
-                // });
 
                 // 监听滚动到顶端
                 this.$el.addEventListener("scroll", function (e) {
@@ -348,7 +510,6 @@
                     this.$el.scrollTop = 1;
                 }, 1);
 
-                console.log(this);
 
                 let that = this;
 
@@ -365,7 +526,8 @@
 
                     // 到达顶部，兼容IOS的顶端滚动bug
                     if (this.scrollTop == 0) {
-                        console.log("到达顶部");
+                        // console.log("到达顶部");
+                        that.onReachTop();
                         clearTimeout(scrollTimer);
                         scrollTimer = setTimeout(() => {
                             this.scrollTop = 1;
@@ -385,7 +547,7 @@
                 });
             },
             // 根据key值进行定位
-            resetScroll(scrollerKey) {
+            resetScrollOffset(scrollerKey) {
                 let PageScroller = window.PageScroller;
                 let scrollerObj = PageScroller[scrollerKey];
                 if (scrollerObj) {
@@ -464,7 +626,7 @@
         },
         watch: {
             $route(to, from) {
-                this.resetScroll(this.scrollerKey);
+                this.resetScrollOffset(this.scrollerKey);
             }
         },
         inheritAttrs: true
@@ -490,7 +652,7 @@
             // overflow: hidden;
             position: relative;
 
-            .page-scroller-top-placeholder-contain {
+            .page-scroller-top-placeholder-container {
                 background: inherit;
                 position: absolute;
                 width: 100%;
@@ -506,7 +668,7 @@
             position: absolute;
             transform: translateY(-100%);
 
-            .page-scroller-bottom-placeholder-contain {
+            .page-scroller-bottom-placeholder-container {
                 background: inherit;
                 position: relative;
                 width: 100%;
@@ -514,7 +676,7 @@
             }
         }
 
-        .page-scroller-contain {
+        .page-scroller-container {
             position: relative;
             z-index: 1;
             background: inherit;
@@ -522,6 +684,28 @@
 
             &.page-scroller-transition {
                 transition: all 0.3s;
+            }
+
+            .page-scroller-inner-top {
+                position: absolute;
+                display: inline-block;
+                width: 100%;
+                transform: translate3d(0, -100%, 0);
+                top: 0;
+                left: 0;
+            }
+
+            .page-scroller-inner-bottom-placeholder {
+                position: fixed;
+                display: inline-block;
+                width: 100%;
+                bottom: 0;
+                left: 0;
+                height: 0;
+
+                .page-scroller-inner-bottom-container {
+                    position: relative;
+                }
             }
         }
     }

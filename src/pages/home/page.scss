@@ -2,7 +2,6 @@
     // padding-bottom: 100px;
     height: 100%;
     overflow: auto;
-    background-color: pink;
 
     .home-test {
         max-height: 300px;
@@ -11,7 +10,22 @@
         overflow-y: auto;
     }
 
-    /deep/ .page-scroller-top-placeholder{
-        background-color: #fff;
+    /deep/ .page-scroller {
+        .trigger-top-area {
+            background-color: #fff;
+        }
+    
+        .page-scroller-top-placeholder {
+            background-color: #fff;
+        }
+
+        .page-scroller-container-content {
+            background-color: pink;
+        }
+
+        .home-test .page-scroller-container-content {
+            background-color: #fff;
+            
+        }
     }
 }

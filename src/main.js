@@ -18,6 +18,16 @@ Mock.mock('/user/userInfo', 'get', {
 
 
 global.mobileUtil.fixScreen();
+
+var $html = document.querySelector("html"),
+    htmlSize = $html.getAttribute("style");
+var $viewport = document.querySelector("meta[name=viewport]"),
+    viewport = $viewport.getAttribute("content");
+var dpr = $html.dataset.dpr,
+    htmlFontSize = $html.style.fontSize.split("px")[0];
+$viewport.setAttribute("content", 'initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no');
+$html.setAttribute("style", 'font-size: ' + htmlFontSize / dpr + 'px!important;');
+
 Vue.config.productionTip = false;
 
 let AppVueData = {
