@@ -8,7 +8,7 @@ import store from "./store";
 import axios from "axios";
 import Mock from "mockjs";
 import packages from "./packages";
-import "./registerServiceWorker";
+// import "./registerServiceWorker";
 
 global.axios = axios;
 
