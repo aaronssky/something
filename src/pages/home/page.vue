@@ -1,6 +1,6 @@
 <template>
     <div class="page-home">
-        <PageScroller b="23" :on-reach-top="onReachTop" scroll-mode="relative" :on-trigger-top="onTriggerTop">
+        <PageScroller b="23" :on-reach-top="onReachTop" scroll-mode="relative" top-max-scroll-height="200" :open-trigger-top="1" open-trigger-bottom="0" top-trigger-height="80" :on-trigger-top="onTriggerTop" :on-reach-bottom="onReachBottom">
             <!-- begin 完整头部 -->
             <!-- <template slot="trigger-top-container" slot-scope="sData">
                 <div class="trigger-top-area">
@@ -13,13 +13,15 @@
             </template> -->
             <!-- endof 完整头部 -->
 
+            <!-- begin 单独设置头部 -->
             <!-- <template slot="trigger-top-container-loading">
                 <div style="height:1rem;">4444</div>
             </template>
-
             <template slot="trigger-top-container-area" slot-scope="sData">
                 <div>{{sData}}</div>
             </template> -->
+            <!-- endof 单独设置头部 -->
+
             <!-- <img alt="Vue logo" src="@/assets/logo.png"> -->
             <div>{{a}}</div>
             <div>{{i}}</div>

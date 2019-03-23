@@ -6,10 +6,20 @@
         <div class="page-scroller-top-placeholder" v-if="scrollMode=='absolute'">
             <div class="page-scroller-top-placeholder-container">
                 <slot name="trigger-top-container" :scrollerStatus="scrollerStatus">
-                    {{style}}
-                    <br>
-                    {{tips}}
-                    <h1>下拉刷新</h1>
+                    <div class="trigger-top-container-loading" v-show="scrollerStatus.triggerTopLoading">
+                        <slot name="trigger-top-container-loading">
+                            加载中...
+                        </slot>
+                    </div>
+                    <div class="trigger-top-container-area" v-show="!scrollerStatus.triggerTopLoading">
+                        <slot name="trigger-top-container-area" :scroller-status="scrollerStatus">
+                            <div>
+                                <span class="iconfont icon-cs-jt-xx-1-1 trigger-top-arrow"
+                                    :class="{'arrow-top': scrollerStatus.topTriggerPercent >= 100}"></span>
+                                {{scrollerStatus.topTriggerPercent < 100?"下拉更新def":"松开更新def"}}
+                            </div>
+                        </slot>
+                    </div>
                 </slot>
             </div>
         </div>
@@ -32,9 +42,6 @@
                                     :class="{'arrow-top': scrollerStatus.topTriggerPercent >= 100}"></span>
                                 {{scrollerStatus.topTriggerPercent < 100?"下拉更新def":"松开更新def"}}
                             </div>
-
-                            <!-- <div class="" v-show="scrollerStatus.topTriggerPercent < 100">下拉更新def</div>
-                            <div class="" v-show="scrollerStatus.topTriggerPercent >= 100">松开更新def</div> -->
                         </slot>
                     </div>
                 </slot>
@@ -43,7 +50,7 @@
 
             <!-- begin 容器正文内容 -->
             <div class="page-scroller-container-content">
-                <div style="    word-wrap: break-word;" v-html="browser">
+                <div style="word-wrap: break-word;" v-html="browser">
                 </div>
                 <div style="height:100px;  word-wrap: break-word;" v-html="scrollerStatus"></div>
                 <slot></slot>
@@ -54,7 +61,7 @@
             <div class="page-scroller-inner-bottom-placeholder">
                 <div class="page-scroller-inner-bottom-container">
                     底部
-                    <div style="    word-wrap: break-word;" v-html="browser"></div>
+                    <div style="word-wrap: break-word;" v-html="browser"></div>
                 </div>
             </div>
             <!-- begin 容器低端滑动展示内容（相对正文低端跟随滚动） -->
@@ -113,17 +120,50 @@
                 type: String,
                 default: ""
             },
+            // 每当到达顶部触发
             onReachTop: {
                 type: Function,
                 default: function () {
                     console.log("default onReachTop")
                 }
             },
+            // 是否开启顶部下拉刷新交互
+            openTriggerTop: {
+                type: [String, Boolean, Number],
+                default: false
+            },
+            // 顶部下拉刷新可下拉最大高度(0表示无限)
+            topMaxScrollHeight: {
+                type: [String, Number],
+                default: 0
+            },
+            topTriggerHeight: {
+                type: [String, Number],
+                default: 100
+            },
+            // 当顶部下拉到阈值时候触发，并会卡住，等待回调完成或者直至timeout
             onTriggerTop: {
                 type: Function,
                 default: function () {
                     console.log("default onTriggerTop")
                 }
+            },
+            // 每当到达底部触发
+            onReachBottom: {
+                type: Function,
+                default: function () {
+                    console.log("default onReachBottom")
+                }
+            },
+            // 底部上拉加载可上拉最大高度(0表示无限)
+            bottomMaxScrollHeight: {
+                type: [String, Number],
+                default: 0
+            },
+            // 是否开启底部上拉加载交互
+            openTriggerBottom: {
+                type: [String, Boolean, Number],
+                default: "0"
             },
 
             // 顶端滚动时候背景的位置
@@ -225,9 +265,19 @@
 
                 this.touchEndEvents.push(function (e) {
                     if (e.touches && e.touches.length == 0 && that.scrollerStatus && that.scrollerStatus
-                        .topTriggerPercent >=
-                        100) {
+                        .topTriggerPercent >= 100) {
                         _onTriggerTop();
+                    }
+                });
+            },
+            _initOnReachBottom() {
+                let that = this,
+                    reachBottomOffset = 0;
+                that.scrollEvents.push(function (e) {
+                    // 到达底部，兼容IOS的顶端滚动bug
+                    if (this.scrollHeight <= this.clientHeight + this.scrollTop + reachBottomOffset) {
+                        that.onReachBottom();
+
                     }
                 });
             },
@@ -237,19 +287,19 @@
                 y = y / 2; // 滑动比例(手势滑动的位移值与滚动位移比例)
 
                 if (this.scrollerStatus.triggerTopLoading) {
-                    window.elTriggerTopLoading = this.$el.querySelector(".trigger-top-container-loading");
-                    elTriggerTopLoading.style.display = "block";
+                    let elTriggerTopLoading = this.$el.querySelector(".trigger-top-container-loading") || {};
+                    if (elTriggerTopLoading.style) {
+                        elTriggerTopLoading.style.display = "block";
+                    }
                     console.log(elTriggerTopLoading);
-                    y = elTriggerTopLoading.clientHeight;
+                    y = elTriggerTopLoading.clientHeight || 25;
                 }
 
-                let topTriggerHeight = 75; // 顶部下拉触发事件高度
+                let topTriggerHeight = ~~this.topTriggerHeight; // 顶部下拉触发事件高度
 
-                let maxScrollHeight = 0; // 上下拉滚动距离最大阈值
+                let topMaxScrollHeight = ~~this.topMaxScrollHeight;
 
-                let topMaxScrollHeight = 300 || maxScrollHeight;
-
-                let bottomMaxScrollHeight = 0 || maxScrollHeight;
+                let bottomMaxScrollHeight = ~~this.bottomMaxScrollHeight;
 
                 // 顶部下拉设置最大高度阈值
                 if (topMaxScrollHeight > 0) {
@@ -336,7 +386,7 @@
                         touchOneY = touchOne.pageY,
                         touchOneDist = touchOneY - touchStartY;
 
-                    if (that.isAtScrollTop) {
+                    if (that.isAtScrollTop && ~~that.openTriggerTop) {
                         // 当前滑动状态是在顶端时候
 
                         if (touchOneDist > 0) {
@@ -385,7 +435,7 @@
                         }
                     }
 
-                    if (that.isAtScrollBottom) {
+                    if (that.isAtScrollBottom && ~~that.openTriggerBottom) {
                         // 当前滑动状态是在底端时候
 
                         if (touchOneDist < 0) {
@@ -564,6 +614,8 @@
                 this._initOnReachTop();
 
                 this._initOnTriggerTop();
+
+                this._initOnReachBottom();
 
                 let that = this;
 

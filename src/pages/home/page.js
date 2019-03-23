@@ -24,8 +24,13 @@ export default {
             console.log("home 页面 TriggerTop 触发");
             setTimeout(() => {
                 console.log("home 页面 TriggerTop load finished");
+
+                // 执行回调通知滚动组件顶部异步刷新已经完成
                 fn_loadFinished();
             }, 1000)
+        },
+        onReachBottom() {
+            console.log("home 页面 到达底部触发");
         }
     },
     components: {
