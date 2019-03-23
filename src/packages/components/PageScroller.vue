@@ -148,6 +148,11 @@
                     console.log("default onTriggerTop")
                 }
             },
+            // 触发onReachBottom事件距离底部的偏移值，
+            reachBottomOffset: {
+                type: [String, Number],
+                default: 0,
+            },
             // 每当到达底部触发
             onReachBottom: {
                 type: Function,
@@ -271,11 +276,10 @@
                 });
             },
             _initOnReachBottom() {
-                let that = this,
-                    reachBottomOffset = 0;
+                let that = this;
                 that.scrollEvents.push(function (e) {
                     // 到达底部，兼容IOS的顶端滚动bug
-                    if (this.scrollHeight <= this.clientHeight + this.scrollTop + reachBottomOffset) {
+                    if (this.scrollHeight <= this.clientHeight + this.scrollTop + ~~that.reachBottomOffset) {
                         that.onReachBottom();
 
                     }
