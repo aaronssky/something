@@ -51,8 +51,23 @@
 </script>
 
 <style lang="scss">
+    // @font-face {
+    //     font-family: 'iconfont';
+    //     /* project id 234229 */
+    //     src: url('//at.alicdn.com/t/font_234229_u7qk27kx94.eot');
+    //     src: url('//at.alicdn.com/t/font_234229_u7qk27kx94.eot?#iefix') format('embedded-opentype'),
+    //         url('//at.alicdn.com/t/font_234229_u7qk27kx94.woff2') format('woff2'),
+    //         url('//at.alicdn.com/t/font_234229_u7qk27kx94.woff') format('woff'),
+    //         url('//at.alicdn.com/t/font_234229_u7qk27kx94.ttf') format('truetype'),
+    //         url('//at.alicdn.com/t/font_234229_u7qk27kx94.svg#iconfont') format('svg');
+    // }
+
     body {
         overflow: hidden;
+    }
+
+    .iconfont {
+        font-size: 24px;
     }
 
     #app {

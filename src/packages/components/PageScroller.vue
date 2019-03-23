@@ -1,11 +1,11 @@
 <template>
-    <div class="page-scroller" :class="{'page-scroller-overflow-hidden':overflowHidden}" :id="id || `PageScroller-${scrollerKey}`"
-        :data-key="scrollerKey">
+    <div class="page-scroller" :class="{'page-scroller-overflow-hidden':overflowHidden}"
+        :id="id || `PageScroller-${scrollerKey}`" :data-key="scrollerKey">
 
         <!-- begin 容器顶端滑动展示内容（固定在正文最顶端） -->
         <div class="page-scroller-top-placeholder" v-if="scrollMode=='absolute'">
             <div class="page-scroller-top-placeholder-container">
-                <slot name="scroll-top-container" :scrollerStatus="scrollerStatus">
+                <slot name="trigger-top-container" :scrollerStatus="scrollerStatus">
                     {{style}}
                     <br>
                     {{tips}}
@@ -19,13 +19,24 @@
 
             <!-- begin 容器顶端滑动展示内容（相对正文顶端跟随滚动） -->
             <div class="page-scroller-inner-top" v-if="scrollMode=='relative'">
-                <slot name="scroll-top-container" :scroller-status="scrollerStatus">
-                    <div v-show="scrollerStatus.triggerTopLoading">加载中...</div>
-                    <div v-show="!scrollerStatus.triggerTopLoading">
-                        <div class="" v-show="scrollerStatus.topTriggerPercent < 100">下拉更新def</div>
-                        <div class="" v-show="scrollerStatus.topTriggerPercent >= 100">松开更新def</div>
+                <slot name="trigger-top-container" :scroller-status="scrollerStatus">
+                    <div class="trigger-top-container-loading" v-show="scrollerStatus.triggerTopLoading">
+                        <slot name="trigger-top-container-loading">
+                            加载中...
+                        </slot>
                     </div>
+                    <div class="trigger-top-container-area" v-show="!scrollerStatus.triggerTopLoading">
+                        <slot name="trigger-top-container-area" :scroller-status="scrollerStatus">
+                            <div>
+                                <span class="iconfont icon-cs-jt-xx-1-1 trigger-top-arrow"
+                                    :class="{'arrow-top': scrollerStatus.topTriggerPercent >= 100}"></span>
+                                {{scrollerStatus.topTriggerPercent < 100?"下拉更新def":"松开更新def"}}
+                            </div>
 
+                            <!-- <div class="" v-show="scrollerStatus.topTriggerPercent < 100">下拉更新def</div>
+                            <div class="" v-show="scrollerStatus.topTriggerPercent >= 100">松开更新def</div> -->
+                        </slot>
+                    </div>
                 </slot>
             </div>
             <!-- endof 容器顶端滑动展示内容（相对正文顶端跟随滚动） -->
@@ -88,6 +99,7 @@
                 touchEndEvents: [],
                 scrollEvents: [],
                 tips: "",
+                remBase: document.querySelector("html").style.fontSize.split("px")[0]
             };
         },
         props: {
@@ -212,7 +224,8 @@
                 }
 
                 this.touchEndEvents.push(function (e) {
-                    if (e.touches && e.touches.length == 0 && that.scrollerStatus && that.scrollerStatus.topTriggerPercent >=
+                    if (e.touches && e.touches.length == 0 && that.scrollerStatus && that.scrollerStatus
+                        .topTriggerPercent >=
                         100) {
                         _onTriggerTop();
                     }
@@ -221,19 +234,22 @@
             // 设置偏移值统一入口
             setTransform(x = 0, y = 0, z = 0) {
 
+                y = y / 2; // 滑动比例(手势滑动的位移值与滚动位移比例)
+
                 if (this.scrollerStatus.triggerTopLoading) {
-                    y = 50;
+                    window.elTriggerTopLoading = this.$el.querySelector(".trigger-top-container-loading");
+                    elTriggerTopLoading.style.display = "block";
+                    console.log(elTriggerTopLoading);
+                    y = elTriggerTopLoading.clientHeight;
                 }
 
-                let topTriggerHeight = 150; // 顶部下拉触发事件高度
+                let topTriggerHeight = 75; // 顶部下拉触发事件高度
 
                 let maxScrollHeight = 0; // 上下拉滚动距离最大阈值
 
-                let topMaxScrollHeight = 600 || maxScrollHeight;
+                let topMaxScrollHeight = 300 || maxScrollHeight;
 
                 let bottomMaxScrollHeight = 0 || maxScrollHeight;
-
-                // y = y / 2; // 滑动比例
 
                 // 顶部下拉设置最大高度阈值
                 if (topMaxScrollHeight > 0) {
@@ -258,7 +274,8 @@
                 }
 
                 // 转成rem
-                y = y / 75;
+                y = y / this.remBase;
+
                 this.style = `transform:translate3d(${x},${y}rem,${z})`;
             },
             // 初始化自动记录滚动位置，当有切换router跳页时候自动回到原先位置
@@ -375,7 +392,8 @@
                             // 手指向上滑动
 
                             // 点击时候相对底部的位置
-                            let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this.clientHeight;
+                            let touchStartOffsetBottom = this.scrollHeight - touchStartScrollTop - this
+                                .clientHeight;
 
                             if (that.compatibleMode) {
                                 // 安卓低端版本微信端才需要这样，用户体验向下兼容
@@ -785,6 +803,16 @@
                 .page-scroller-inner-bottom-container {
                     position: relative;
                 }
+            }
+        }
+
+        .trigger-top-arrow {
+            transition: all 0.3s;
+            display: inline-block;
+            font-size: 32px;
+
+            &.arrow-top {
+                transform: rotateZ(-180deg);
             }
         }
     }
