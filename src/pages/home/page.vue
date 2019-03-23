@@ -1,6 +1,6 @@
 <template>
     <div class="page-home">
-        <PageScroller b="23" :on-reach-top="onReachTop" scroll-mode="relative" top-max-scroll-height="200" :open-trigger-top="0" open-trigger-bottom="0" top-trigger-height="80" :on-trigger-top="onTriggerTop" :on-reach-bottom="onReachBottom" reach-bottom-offset="0">
+        <PageScroller b="23" :on-reach-top="onReachTop" scroll-mode="relative" top-max-scroll-height="200" :open-trigger-top="1" open-trigger-bottom="0" top-trigger-height="80" :on-trigger-top="onTriggerTop" :on-reach-bottom="onReachBottom" reach-bottom-offset="0">
             <!-- begin 完整头部 -->
             <!-- <template slot="trigger-top-container" slot-scope="sData">
                 <div class="trigger-top-area">

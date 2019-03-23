@@ -557,7 +557,7 @@
 
                     // IOS体验兼容
                     // 下拉时候，transition元素移动会引起滚动条变高，从而底部产生奇葩的空间，故通过元素高度改动，触发重绘
-                    if (that.isIos) {
+                    if (that.isIos && (~~that.openTriggerTop || ~~that.openTriggerBottom)) {
                         $(that.$el).find(".pp").css({
                             "padding-bottom": "1px"
                         });
@@ -611,7 +611,9 @@
 
                 this._initRecordOffset();
 
-                this._initBaseEvents();
+                if (~~this.openTriggerTop || ~~this.openTriggerBottom) {
+                    this._initBaseEvents();
+                }
 
                 this._initCompatibility();
 
