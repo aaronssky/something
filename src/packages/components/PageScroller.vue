@@ -499,31 +499,36 @@
 
                 this.scrollEvents.push(function (e) {
                     // 到达了滚动条顶部
-                    if (this.scrollTop <= 1) {
-                        that.isAtScrollTop = true;
+                    if (~~that.openTriggerTop) {
+                        if (this.scrollTop <= 1) {
+                            that.isAtScrollTop = true;
 
-                        if (that.touches && that.touches.length > 0) {
-                            // 触摸状态上下滑动滚动条会滚动影响体验，故禁止滚动
-                            that.overflowHidden = true;
+                            if (that.touches && that.touches.length > 0) {
+                                // 触摸状态上下滑动滚动条会滚动影响体验，故禁止滚动
+                                that.overflowHidden = true;
+                            } else {
+                                // 松开手指后的滚动条持续滚动
+                            }
                         } else {
-                            // 松开手指后的滚动条持续滚动
+                            that.isAtScrollTop = false;
                         }
-                    } else {
-                        that.isAtScrollTop = false;
                     }
 
-                    if (this.scrollHeight <= this.clientHeight + this.scrollTop + 1) {
-                        that.isAtScrollBottom = true;
+                    if (~~that.openTriggerBottom) {
+                        if (this.scrollHeight <= this.clientHeight + this.scrollTop + 1) {
+                            that.isAtScrollBottom = true;
 
-                        if (that.touches && that.touches.length > 0) {
-                            // 触摸状态上下滑动滚动条会滚动影响体验，故禁止滚动
-                            that.overflowHidden = true;
+                            if (that.touches && that.touches.length > 0) {
+                                // 触摸状态上下滑动滚动条会滚动影响体验，故禁止滚动
+                                that.overflowHidden = true;
+                            } else {
+                                // 松开手指后的滚动条持续滚动
+                            }
                         } else {
-                            // 松开手指后的滚动条持续滚动
+                            that.isAtScrollBottom = false;
                         }
-                    } else {
-                        that.isAtScrollBottom = false;
                     }
+
                 });
 
             },
